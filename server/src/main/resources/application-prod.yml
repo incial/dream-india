@@ -1,0 +1,109 @@
+spring:
+  application:
+    name: incial-backend
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASS}
+    driver-class-name: org.postgresql.Driver
+
+    hikari:
+      pool-name: IncialHikariPool
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 20000   # 20s
+      idle-timeout: 180000        # 3 minutes
+      max-lifetime: 900000        # 15 minutes
+      validation-timeout: 5000
+      auto-commit: false
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: UTC
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+google:
+  client:
+    id: ${GOOGLE_CLIENT_ID}
+
+# ===========================
+# JWT CONFIGURATION
+# ===========================
+jwt:
+  secret: ${JWT_SECRET}
+
+# ===========================
+# LOGGING
+# ===========================
+logging:
+  level:
+    root: INFO
+    com.incial: INFO
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql: WARN
+  file:
+    name: /app/logs/application.log
+    max-size: 10MB
+    max-history: 7
+
+# ===========================
+# ACTUATOR
+# ===========================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    defaults:
+      enabled: true
+
+# ===========================
+# SERVER (TOMCAT)
+# ===========================
+server:
+  port: ${SERVER_PORT:8080}
+
+  compression:
+    enabled: true
+    mime-types: >
+      text/html,
+      text/xml,
+      text/plain,
+      text/css,
+      text/javascript,
+      application/javascript,
+      application/json
+
+  tomcat:
+    threads:
+      max: 50
+      min-spare: 5
