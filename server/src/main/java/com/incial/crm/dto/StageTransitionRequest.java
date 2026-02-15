@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiResponse<T> {
-    private boolean success;
-    private String message;
-    private T data;
-    private int statusCode;
+public class StageTransitionRequest {
+    private String toStage;
+    private String remarks;
 }
