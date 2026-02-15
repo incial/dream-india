@@ -16,7 +16,6 @@ public class UserDto {
     private String name;
     private String email;
     private String role;
-    private Integer tasksCompleted;
     private String googleId;
     private String avatarUrl;
     private Long clientCrmId;

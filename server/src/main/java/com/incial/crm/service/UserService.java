@@ -36,20 +36,12 @@ public class UserService {
         return convertToDto(user);
     }
 
-    public void incrementTasksCompleted(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
-        user.setTasksCompleted(user.getTasksCompleted() + 1);
-        userRepository.save(user);
-    }
-
     private UserDto convertToDto(User entity) {
         return UserDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .email(entity.getEmail())
                 .role(entity.getRole())
-                .tasksCompleted(entity.getTasksCompleted())
                 .googleId(entity.getGoogleId())
                 .avatarUrl(entity.getAvatarUrl())
                 .createdAt(entity.getCreatedAt())

@@ -31,10 +31,6 @@ public class User {
     @Column(nullable = false, length = 50)
     private String role;
 
-    @Column(name = "tasks_completed", nullable = false)
-    @Builder.Default
-    private Integer tasksCompleted = 0;
-
     @Column(name = "google_id", unique = true, length = 255)
     private String googleId;
 
@@ -50,8 +46,5 @@ public class User {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        if (tasksCompleted == null) {
-            tasksCompleted = 0;
-        }
     }
 }
