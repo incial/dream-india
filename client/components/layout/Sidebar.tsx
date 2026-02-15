@@ -1,6 +1,6 @@
 
 import React, { useRef, useLayoutEffect } from 'react';
-import { Users, Briefcase, LogOut, X, FolderKanban, DollarSign, CreditCard, Wrench } from 'lucide-react';
+import { Users, Briefcase, LogOut, X, FolderKanban, DollarSign, CreditCard, Wrench, Archive } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
@@ -129,6 +129,7 @@ export const Sidebar: React.FC = () => {
                     {isSales && <NavItem collapsed={isSidebarCollapsed} icon={DollarSign} label="Sales" to="/sales" active={currentPath.startsWith('/sales')} />}
                     {isAccounts && <NavItem collapsed={isSidebarCollapsed} icon={CreditCard} label="Accounts" to="/accounts" active={currentPath.startsWith('/accounts')} />}
                     {isInstallation && <NavItem collapsed={isSidebarCollapsed} icon={Wrench} label="Installation" to="/installation" active={currentPath.startsWith('/installation')} />}
+                    <NavItem collapsed={isSidebarCollapsed} icon={Archive} label="Completed" to="/completed" active={currentPath.startsWith('/completed')} />
                     {isAdmin && <NavItem collapsed={isSidebarCollapsed} icon={Users} label="Pipeline" to="/crm" active={currentPath === '/crm'} />}
                     {isEmployee && <NavItem collapsed={isSidebarCollapsed} icon={Briefcase} label="Registry" to="/companies" active={currentPath.startsWith('/companies')} />}
                 </div>

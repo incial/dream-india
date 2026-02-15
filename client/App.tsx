@@ -14,6 +14,7 @@ import { ExecutivePage } from './pages/ExecutivePage';
 import { SalesCoordinatorPage } from './pages/SalesCoordinatorPage';
 import { AccountsPage } from './pages/AccountsPage';
 import { InstallationPage } from './pages/InstallationPage';
+import { WorkCompletedPage } from './pages/WorkCompletedPage';
 
 // Admin Route (Super Admin + Admin) - For CRM/Pipeline
 const AdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -139,6 +140,13 @@ const AppRoutes = () => {
                 <InstallationRoute>
                     <InstallationPage />
                 </InstallationRoute>
+            } />
+            
+            {/* Work Completed Archive - All authenticated users */}
+            <Route path="/completed" element={
+                <OperationalRoute>
+                    <WorkCompletedPage />
+                </OperationalRoute>
             } />
             
             {/* Pipeline - Admin and Super Admin only */}
