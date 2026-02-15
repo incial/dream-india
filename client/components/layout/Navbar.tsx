@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, ChevronDown, PanelLeft, Plus, Search, User, LogOut, Shield, Sparkles, CheckCircle2, Gamepad2, Calendar, Zap, HelpCircle } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Bell, ChevronDown, PanelLeft, Search, User, LogOut } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
 
@@ -8,7 +8,6 @@ export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const { toggleSidebar } = useLayout();
   const location = useLocation();
-  const navigate = useNavigate();
   
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -38,11 +37,8 @@ export const Navbar: React.FC = () => {
 
   const getPageContext = () => {
       const path = location.pathname;
-      if (path === '/dashboard') return 'Operational Intel';
       if (path === '/crm') return 'Market Pipeline';
-      if (path.startsWith('/tasks')) return 'Execution Workflow';
-      if (path === '/portal') return 'Client Interface';
-      if (path === '/calendar') return 'Temporal Registry';
+      if (path === '/companies') return 'Company Registry';
       return 'Workhub OS';
   };
 
@@ -77,26 +73,6 @@ export const Navbar: React.FC = () => {
       {/* Action Controls */}
       <div className="flex items-center gap-3 lg:gap-6 ml-auto pointer-events-auto">
         <div className="flex items-center gap-2 lg:gap-5">
-            <Link 
-                to="/tasks"
-                className="hidden sm:flex items-center gap-3 px-4 lg:px-6 py-2.5 lg:py-3.5 bg-slate-950 text-white rounded-2xl lg:rounded-3xl shadow-2xl hover:scale-[1.03] active:scale-95 transition-all group overflow-hidden relative"
-            >
-                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-600/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <Plus className="h-4 w-4 lg:h-5 lg:w-5 text-indigo-400 relative z-10 group-hover:rotate-90 transition-transform duration-300" />
-                <span className="text-[10px] lg:text-[11px] font-black uppercase tracking-[0.2em] relative z-10 hidden xl:block">Deploy</span>
-            </Link>
-
-            <div className="h-6 lg:h-8 w-px bg-slate-200/60 hidden sm:block"></div>
-
-            {/* Universal Calendar Shortcut */}
-            <Link 
-                to="/calendar"
-                className={`p-3 lg:p-4 glass-panel rounded-2xl lg:rounded-3xl shadow-premium transition-all relative group border-white/40 ${location.pathname === '/calendar' ? 'bg-white/80 ring-2 ring-indigo-500/20 text-indigo-600 shadow-glass-glow' : 'text-slate-500 hover:text-slate-900 hover:bg-white/60'}`}
-                title="Universal Calendar"
-            >
-                <Calendar className={`h-5 w-5 lg:h-6 lg:w-6 ${location.pathname === '/calendar' ? 'text-indigo-600' : 'group-hover:scale-110'} transition-all`} />
-            </Link>
-
             <div className="relative" ref={notifyRef}>
                 <button 
                     onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
@@ -115,7 +91,7 @@ export const Navbar: React.FC = () => {
                         <div className="flex flex-col items-center justify-center py-6 lg:py-10 text-center">
                             <div className="relative mb-6">
                                 <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-xl animate-pulse" />
-                                <CheckCircle2 className="h-10 w-10 lg:h-12 lg:w-12 text-indigo-500 relative z-10" />
+                                <Bell className="h-10 w-10 lg:h-12 lg:w-12 text-indigo-500 relative z-10" />
                             </div>
                             <p className="text-sm font-bold text-slate-900">All Systems Nominal</p>
                             <p className="text-[10px] font-medium text-slate-400 mt-2 uppercase tracking-widest leading-relaxed">No high-priority alerts <br/> detected in this cycle.</p>
@@ -171,25 +147,7 @@ export const Navbar: React.FC = () => {
 
                     {/* Navigation Menu */}
                     <div className="space-y-1 p-1">
-                        <Link to="/profile" className="flex items-center gap-4 px-4 py-3.5 rounded-[1.5rem] hover:bg-white hover:shadow-md transition-all group">
-                            <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl group-hover:scale-110 transition-transform">
-                                <User className="h-4 w-4" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-black text-slate-700">Identity Profile</p>
-                                <p className="text-[9px] font-medium text-slate-400">Personal settings & security</p>
-                            </div>
-                        </Link>
-
-                        <Link to="/break" className="flex items-center gap-4 px-4 py-3.5 rounded-[1.5rem] hover:bg-white hover:shadow-md transition-all group">
-                            <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-110 transition-transform">
-                                <Zap className="h-4 w-4" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-black text-slate-700">Focus Mode</p>
-                                <p className="text-[9px] font-medium text-slate-400">Tactical mental reset</p>
-                            </div>
-                        </Link>
+                        {/* No additional menu items needed */}
                     </div>
 
                     {/* Footer Actions */}

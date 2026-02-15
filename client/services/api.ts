@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CRMEntry, Task, Meeting, AuthResponse, User, ForgotPasswordRequest, VerifyOtpRequest, ChangePasswordRequest, UpdatePasswordRequest, ApiResponse, RegisterRequest } from '../types';
+import { CRMEntry, AuthResponse, User, ForgotPasswordRequest, VerifyOtpRequest, ChangePasswordRequest, UpdatePasswordRequest, ApiResponse, RegisterRequest } from '../types';
 
 // ============================================================================
 // ⚙️ API CONFIGURATION
@@ -218,90 +218,7 @@ export const companiesApi = {
   }
 };
 
-// --- TASKS API ---
-export const tasksApi = {
-  getAll: async (): Promise<Task[]> => {
-    try {
-        const res = await api.get("/tasks/all");
-        return res.data;
-    } catch (error) { throw handleApiError(error); }
-  },
 
-  getActive: async (): Promise<Task[]> => {
-    try {
-        const res = await api.get("/tasks/active");
-        return res.data;
-    } catch (error) { throw handleApiError(error); }
-  },
-
-  getCompleted: async (): Promise<Task[]> => {
-    try {
-        const res = await api.get("/tasks/completed");
-        return res.data;
-    } catch (error) { throw handleApiError(error); }
-  },
-
-  getClientTasks: async (): Promise<Task[]> => {
-    try {
-        const res = await api.get("/tasks/client-tasks");
-        return res.data;
-    } catch (error) { throw handleApiError(error); }
-  },
-
-  create: async (data: Omit<Task, 'id' | 'createdAt'>): Promise<Task> => {
-    try {
-        const payload = cleanPayload(data);
-        const res = await api.post("/tasks/create", payload);
-        return res.data;
-    } catch (error) { throw handleApiError(error); }
-  },
-
-  update: async (id: number, data: Partial<Task>): Promise<Task> => {
-     try {
-        const payload = cleanPayload(data);
-        const res = await api.put(`/tasks/update/${id}`, payload);
-        return res.data;
-     } catch (error) { throw handleApiError(error); }
-  },
-
-  delete: async (id: number): Promise<void> => {
-    try {
-        await api.delete(`/tasks/delete/${id}`);
-    } catch (error) { throw handleApiError(error); }
-  }
-};
-
-// --- MEETINGS API ---
-export const meetingsApi = {
-  getAll: async (): Promise<Meeting[]> => {
-    try {
-        const res = await api.get("/meetings/all");
-        return res.data;
-    } catch (error) { throw handleApiError(error); }
-  },
-
-  create: async (data: Omit<Meeting, 'id' | 'createdAt'>): Promise<Meeting> => {
-    try {
-        const payload = cleanPayload(data);
-        const res = await api.post("/meetings/create", payload);
-        return res.data;
-    } catch (error) { throw handleApiError(error); }
-  },
-
-  update: async (id: number, data: Partial<Meeting>): Promise<Meeting> => {
-    try {
-        const payload = cleanPayload(data);
-        const res = await api.put(`/meetings/update/${id}`, payload);
-        return res.data;
-    } catch (error) { throw handleApiError(error); }
-  },
-
-  delete: async (id: number): Promise<void> => {
-    try {
-        await api.delete(`/meetings/delete/${id}`);
-    } catch (error) { throw handleApiError(error); }
-  }
-};
 
 // --- AUTH API ---
 export const authApi = {

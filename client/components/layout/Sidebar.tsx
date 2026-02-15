@@ -1,6 +1,6 @@
 
 import React, { useRef, useLayoutEffect } from 'react';
-import { Users, Briefcase, PieChart, CheckSquare, Calendar, LayoutDashboard, Home, Shield, Zap, LogOut, X, Activity } from 'lucide-react';
+import { Users, Briefcase, LogOut, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
@@ -67,10 +67,8 @@ export const Sidebar: React.FC = () => {
     };
     
     const role = user?.role;
-    const isSuperAdmin = role === 'ROLE_SUPER_ADMIN';
-    const isAdmin = role === 'ROLE_ADMIN' || isSuperAdmin;
+    const isAdmin = role === 'ROLE_ADMIN' || role === 'ROLE_SUPER_ADMIN';
     const isEmployee = role === 'ROLE_EMPLOYEE' || isAdmin;
-    const isClient = role === 'ROLE_CLIENT';
 
   return (
     <>
@@ -123,34 +121,9 @@ export const Sidebar: React.FC = () => {
                         <p className="px-4 lg:px-6 text-[10px] lg:text-[11px] font-black text-slate-600 uppercase tracking-[0.4em] mb-3 lg:mb-6">Core Operations</p>
                     )}
                     
-                    {isClient ? (
-                        <NavItem collapsed={isSidebarCollapsed} icon={Home} label="Project Hub" to="/portal" active={currentPath === '/portal'} />
-                    ) : (
-                        <NavItem collapsed={isSidebarCollapsed} icon={LayoutDashboard} label="Command Center" to="/dashboard" active={currentPath === '/dashboard'} />
-                    )}
-                    
                     {isAdmin && <NavItem collapsed={isSidebarCollapsed} icon={Users} label="Pipeline" to="/crm" active={currentPath === '/crm'} />}
-                    
-                    {isEmployee && (
-                        <>
-                            <NavItem collapsed={isSidebarCollapsed} icon={CheckSquare} label="Tasks" to="/tasks" active={currentPath.startsWith('/tasks')} />
-                            <NavItem collapsed={isSidebarCollapsed} icon={Calendar} label="Scheduler" to="/meetings" active={currentPath.startsWith('/meetings')} />
-                            <NavItem collapsed={isSidebarCollapsed} icon={Briefcase} label="Registry" to="/companies" active={currentPath.startsWith('/companies')} />
-                            <NavItem collapsed={isSidebarCollapsed} icon={Activity} label="Tracker" to="/client-tracker" active={currentPath.startsWith('/client-tracker')} />
-                        </>
-                    )}
+                    {isEmployee && <NavItem collapsed={isSidebarCollapsed} icon={Briefcase} label="Registry" to="/companies" active={currentPath.startsWith('/companies')} />}
                 </div>
-
-                {isSuperAdmin && (
-                    <div className="pt-6 lg:pt-8 border-t border-white/5 space-y-1 lg:space-y-2">
-                        {!isSidebarCollapsed && (
-                            <p className="px-4 lg:px-6 text-[10px] lg:text-[11px] font-black text-slate-600 uppercase tracking-[0.4em] mb-3 lg:mb-6">Administrative</p>
-                        )}
-                        <NavItem collapsed={isSidebarCollapsed} icon={PieChart} label="Intell-Reports" to="/reports" active={currentPath === '/reports'} />
-                        <NavItem collapsed={isSidebarCollapsed} icon={Shield} label="Directory" to="/admin/users" active={currentPath === '/admin/users'} />
-                        <NavItem collapsed={isSidebarCollapsed} icon={Zap} label="Performance" to="/admin/performance" active={currentPath === '/admin/performance'} />
-                    </div>
-                )}
             </div>
 
             <div className="mt-auto p-3 lg:p-4 space-y-4 lg:space-y-5 relative z-10 bg-slate-950/50 backdrop-blur-md border-t border-white/5 overflow-hidden">
