@@ -11,6 +11,9 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { UnauthorizedPage } from './pages/UnauthorizedPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ExecutivePage } from './pages/ExecutivePage';
+import { SalesCoordinatorPage } from './pages/SalesCoordinatorPage';
+import { AccountsPage } from './pages/AccountsPage';
+import { InstallationPage } from './pages/InstallationPage';
 
 // Admin Route (Super Admin + Admin) - For CRM/Pipeline
 const AdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -29,6 +32,39 @@ const ExecutiveRoute: React.FC<{ children: React.ReactElement }> = ({ children }
     if (!isAuthenticated) return <Navigate to="/login" replace />;
     
     if (user?.role === 'ROLE_EXECUTIVE' || user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_SUPER_ADMIN') {
+        return children;
+    }
+    return <Navigate to="/unauthorized" replace />;
+};
+
+// Sales Route - For Sales Coordinator
+const SalesRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+    const { isAuthenticated, user } = useAuth();
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    
+    if (user?.role === 'ROLE_SALES_COORDINATOR' || user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_SUPER_ADMIN') {
+        return children;
+    }
+    return <Navigate to="/unauthorized" replace />;
+};
+
+// Accounts Route - For Accounts Department
+const AccountsRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+    const { isAuthenticated, user } = useAuth();
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    
+    if (user?.role === 'ROLE_ACCOUNTS' || user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_SUPER_ADMIN') {
+        return children;
+    }
+    return <Navigate to="/unauthorized" replace />;
+};
+
+// Installation Route - For Installation Team
+const InstallationRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+    const { isAuthenticated, user } = useAuth();
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    
+    if (user?.role === 'ROLE_INSTALLATION' || user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_SUPER_ADMIN') {
         return children;
     }
     return <Navigate to="/unauthorized" replace />;
@@ -82,6 +118,27 @@ const AppRoutes = () => {
                 <ExecutiveRoute>
                     <ExecutivePage />
                 </ExecutiveRoute>
+            } />
+            
+            {/* Sales Coordinator Module */}
+            <Route path="/sales" element={
+                <SalesRoute>
+                    <SalesCoordinatorPage />
+                </SalesRoute>
+            } />
+            
+            {/* Accounts Module */}
+            <Route path="/accounts" element={
+                <AccountsRoute>
+                    <AccountsPage />
+                </AccountsRoute>
+            } />
+            
+            {/* Installation Module */}
+            <Route path="/installation" element={
+                <InstallationRoute>
+                    <InstallationPage />
+                </InstallationRoute>
             } />
             
             {/* Pipeline - Admin and Super Admin only */}
