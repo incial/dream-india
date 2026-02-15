@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CRMEntry, AuthResponse, User, ForgotPasswordRequest, VerifyOtpRequest, ChangePasswordRequest, UpdatePasswordRequest, ApiResponse, RegisterRequest } from '../types';
+import { CRMEntry, AuthResponse, User, ForgotPasswordRequest, VerifyOtpRequest, ChangePasswordRequest, UpdatePasswordRequest, ApiResponse, RegisterRequest, Project, CreateProjectRequest, UpdateSalesDataRequest, UpdateAccountsDataRequest, UpdateInstallationDataRequest, StageTransitionRequest, ProjectStage } from '../types';
 
 // ============================================================================
 // ⚙️ API CONFIGURATION
@@ -268,6 +268,132 @@ export const authApi = {
     try {
         const res = await api.post("/auth/update-password", data);
         return res.data;
+    } catch (error) { throw handleApiError(error); }
+  }
+};
+
+// ============================================================================
+// 📋 PROJECT API ENDPOINTS (Work Hub CRM)
+// ============================================================================
+
+export const projectApi = {
+  // Executive - Create Project
+  createProject: async (data: CreateProjectRequest): Promise<Project> => {
+    try {
+        const res = await api.post("/projects/create", data);
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Executive - Update Project
+  updateProject: async (id: number, data: CreateProjectRequest): Promise<Project> => {
+    try {
+        const res = await api.put(`/projects/${id}`, data);
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Executive - Transition Stage
+  transitionStage: async (id: number, data: StageTransitionRequest): Promise<Project> => {
+    try {
+        const res = await api.post(`/projects/${id}/transition`, data);
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Get Executive Projects
+  getExecutiveProjects: async (): Promise<Project[]> => {
+    try {
+        const res = await api.get("/projects/executive");
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Sales - Get Projects
+  getSalesProjects: async (): Promise<Project[]> => {
+    try {
+        const res = await api.get("/projects/sales");
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Sales - Update Sales Data
+  updateSalesData: async (id: number, data: UpdateSalesDataRequest): Promise<Project> => {
+    try {
+        const res = await api.put(`/projects/${id}/sales`, data);
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Sales - Mark Ready for Accounts
+  markReadyForAccounts: async (id: number): Promise<Project> => {
+    try {
+        const res = await api.post(`/projects/${id}/ready-for-accounts`);
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Accounts - Get Projects
+  getAccountsProjects: async (): Promise<Project[]> => {
+    try {
+        const res = await api.get("/projects/accounts");
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Accounts - Update Accounts Data
+  updateAccountsData: async (id: number, data: UpdateAccountsDataRequest): Promise<Project> => {
+    try {
+        const res = await api.put(`/projects/${id}/accounts`, data);
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Installation - Get Projects
+  getInstallationProjects: async (): Promise<Project[]> => {
+    try {
+        const res = await api.get("/projects/installation");
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Installation - Update Installation Data
+  updateInstallationData: async (id: number, data: UpdateInstallationDataRequest): Promise<Project> => {
+    try {
+        const res = await api.put(`/projects/${id}/installation`, data);
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Get Completed Projects
+  getCompletedProjects: async (): Promise<Project[]> => {
+    try {
+        const res = await api.get("/projects/completed");
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Get Project By ID
+  getProjectById: async (id: number): Promise<Project> => {
+    try {
+        const res = await api.get(`/projects/${id}`);
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Admin - Get All Projects
+  getAllProjects: async (): Promise<Project[]> => {
+    try {
+        const res = await api.get("/projects/all");
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Get Projects by Stage
+  getProjectsByStage: async (stage: ProjectStage): Promise<Project[]> => {
+    try {
+        const res = await api.get(`/projects/stage/${stage}`);
+        return res.data.data;
     } catch (error) { throw handleApiError(error); }
   }
 };

@@ -1,7 +1,24 @@
 
 export type CRMStatus = 'onboarded' | 'drop' | 'on progress' | 'Quote Sent' | 'lead' | 'completed';
 
-export type UserRole = 'ROLE_SUPER_ADMIN' | 'ROLE_ADMIN' | 'ROLE_EMPLOYEE' | 'ROLE_CLIENT';
+// Work Hub CRM Project Stages
+export type ProjectStage = 
+  | 'LEAD' 
+  | 'ON_PROGRESS' 
+  | 'QUOTATION_SENT' 
+  | 'IN_REVIEW' 
+  | 'ONBOARDED' 
+  | 'SALES' 
+  | 'ACCOUNTS' 
+  | 'INSTALLATION' 
+  | 'COMPLETED';
+
+export type PaymentStatus = 'PENDING' | 'PARTIAL' | 'COMPLETED';
+export type InstallationStatus = 'PENDING' | 'WORK_DONE' | 'NOT_DONE';
+export type Region = 'North' | 'South';
+
+export type UserRole = 'ROLE_SUPER_ADMIN' | 'ROLE_ADMIN' | 'ROLE_EMPLOYEE' | 'ROLE_CLIENT' 
+  | 'ROLE_EXECUTIVE' | 'ROLE_SALES_COORDINATOR' | 'ROLE_ACCOUNTS' | 'ROLE_INSTALLATION';
 
 export interface User {
   id: number;
@@ -197,3 +214,106 @@ export type CalendarItem = {
     status: string;
     priority?: string; 
 };
+
+// Work Hub CRM Project Entity
+export interface Project {
+  id: number;
+  
+  // Base Information
+  school: string;
+  contactPerson?: string;
+  contactNumber?: string;
+  place?: string;
+  district?: string;
+  region?: Region;
+  projectName?: string;
+  parentCompany?: string;
+  executiveRemarks?: string;
+  createdDate: string;
+  createdBy: string;
+  
+  // Stage Tracking
+  currentStage: ProjectStage;
+  previousStage?: ProjectStage;
+  stageChangeTimestamp?: string;
+  stageChangedBy?: string;
+  currentOwnerRole?: string;
+  
+  // Sales Data
+  projectValue?: number;
+  invoiceAmount?: number;
+  pendingDelivery?: string;
+  quotationRemarks?: string;
+  expectedDeliveryDate?: string;
+  salesRemarks?: string;
+  salesUpdatedTimestamp?: string;
+  
+  // Accounts Data
+  paymentStatus?: PaymentStatus;
+  amountReceived?: number;
+  pendingAmount?: number;
+  paymentDate?: string;
+  paymentRemarks?: string;
+  paymentProofUrl?: string;
+  accountsUpdatedTimestamp?: string;
+  
+  // Installation Data
+  installationStatus?: InstallationStatus;
+  installationRemarks?: string;
+  completionDate?: string;
+  installationUpdatedTimestamp?: string;
+  
+  // Audit
+  lastUpdatedBy?: string;
+  lastUpdatedAt?: string;
+  isLocked?: boolean;
+}
+
+export interface CreateProjectRequest {
+  school: string;
+  contactPerson?: string;
+  contactNumber?: string;
+  place?: string;
+  district?: string;
+  region?: Region;
+  projectName?: string;
+  parentCompany?: string;
+  executiveRemarks?: string;
+}
+
+export interface UpdateSalesDataRequest {
+  projectValue?: number;
+  invoiceAmount?: number;
+  pendingDelivery?: string;
+  quotationRemarks?: string;
+  expectedDeliveryDate?: string;
+  salesRemarks?: string;
+}
+
+export interface UpdateAccountsDataRequest {
+  paymentStatus?: PaymentStatus;
+  amountReceived?: number;
+  pendingAmount?: number;
+  paymentDate?: string;
+  paymentRemarks?: string;
+  paymentProofUrl?: string;
+}
+
+export interface UpdateInstallationDataRequest {
+  installationStatus?: InstallationStatus;
+  installationRemarks?: string;
+  completionDate?: string;
+}
+
+export interface StageTransitionRequest {
+  toStage: ProjectStage;
+  remarks?: string;
+}
+
+export interface ProjectFilterState {
+  stage?: ProjectStage;
+  district?: string;
+  region?: Region;
+  parentCompany?: string;
+  search?: string;
+}

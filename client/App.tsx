@@ -10,6 +10,7 @@ import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { UnauthorizedPage } from './pages/UnauthorizedPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ExecutivePage } from './pages/ExecutivePage';
 
 // Admin Route (Super Admin + Admin) - For CRM/Pipeline
 const AdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -17,6 +18,17 @@ const AdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) =>
     if (!isAuthenticated) return <Navigate to="/login" replace />;
     
     if (user?.role === 'ROLE_SUPER_ADMIN' || user?.role === 'ROLE_ADMIN') {
+        return children;
+    }
+    return <Navigate to="/unauthorized" replace />;
+};
+
+// Executive Route - For Project Management
+const ExecutiveRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+    const { isAuthenticated, user } = useAuth();
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    
+    if (user?.role === 'ROLE_EXECUTIVE' || user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_SUPER_ADMIN') {
         return children;
     }
     return <Navigate to="/unauthorized" replace />;
@@ -63,6 +75,13 @@ const AppRoutes = () => {
                 <PublicRoute>
                     <ForgotPasswordPage />
                 </PublicRoute>
+            } />
+            
+            {/* Projects - Executive Module */}
+            <Route path="/projects" element={
+                <ExecutiveRoute>
+                    <ExecutivePage />
+                </ExecutiveRoute>
             } />
             
             {/* Pipeline - Admin and Super Admin only */}

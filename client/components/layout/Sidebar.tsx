@@ -1,6 +1,6 @@
 
 import React, { useRef, useLayoutEffect } from 'react';
-import { Users, Briefcase, LogOut, X } from 'lucide-react';
+import { Users, Briefcase, LogOut, X, FolderKanban } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
@@ -69,6 +69,7 @@ export const Sidebar: React.FC = () => {
     const role = user?.role;
     const isAdmin = role === 'ROLE_ADMIN' || role === 'ROLE_SUPER_ADMIN';
     const isEmployee = role === 'ROLE_EMPLOYEE' || isAdmin;
+    const isExecutive = role === 'ROLE_EXECUTIVE' || isAdmin;
 
   return (
     <>
@@ -121,6 +122,7 @@ export const Sidebar: React.FC = () => {
                         <p className="px-4 lg:px-6 text-[10px] lg:text-[11px] font-black text-slate-600 uppercase tracking-[0.4em] mb-3 lg:mb-6">Core Operations</p>
                     )}
                     
+                    {isExecutive && <NavItem collapsed={isSidebarCollapsed} icon={FolderKanban} label="Projects" to="/projects" active={currentPath.startsWith('/projects')} />}
                     {isAdmin && <NavItem collapsed={isSidebarCollapsed} icon={Users} label="Pipeline" to="/crm" active={currentPath === '/crm'} />}
                     {isEmployee && <NavItem collapsed={isSidebarCollapsed} icon={Briefcase} label="Registry" to="/companies" active={currentPath.startsWith('/companies')} />}
                 </div>
