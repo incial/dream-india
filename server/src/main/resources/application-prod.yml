@@ -1,6 +1,6 @@
 spring:
   application:
-    name: incial-backend
+    name: Dream-India
 
   datasource:
     url: ${DB_URL}

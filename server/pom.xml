@@ -16,8 +16,8 @@
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>Incial Backend</name>
-    <description>Backend API for Incial CRM System</description>
+    <name>Dream India Backend</name>
+    <description>Backend API for Dream India CRM System</description>
 
     <properties>
         <java.version>17</java.version>
