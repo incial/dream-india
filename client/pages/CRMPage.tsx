@@ -13,7 +13,7 @@ import { useToast } from '../context/ToastContext';
 import { useLayout } from '../context/LayoutContext';
 
 export const CRMPage: React.FC = () => {
-  const { isSidebarCollapsed } = useLayout();
+  const { isSidebarCollapsed, showSidebar } = useLayout();
   const { user } = useAuth();
   const { showToast } = useToast();
   const [entries, setEntries] = useState<CRMEntry[]>([]);
@@ -89,7 +89,7 @@ export const CRMPage: React.FC = () => {
       <div className="glass-canvas" />
       <Sidebar />
       
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-in-out ${isSidebarCollapsed ? 'lg:ml-28' : 'lg:ml-80'}`}>
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-in-out ${!showSidebar ? 'lg:ml-0' : isSidebarCollapsed ? 'lg:ml-28' : 'lg:ml-80'}`}>
         <Navbar />
         
         <div className="px-4 lg:px-12 py-6 lg:py-10 pb-32">

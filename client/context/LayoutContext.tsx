@@ -4,8 +4,10 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 interface LayoutContextType {
   isSidebarCollapsed: boolean;
   isMobileSidebarOpen: boolean;
+  showSidebar: boolean;
   toggleSidebar: () => void;
   closeMobileSidebar: () => void;
+  setShowSidebar: (show: boolean) => void;
 }
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
@@ -17,6 +19,7 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   });
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true); // Default to true, Sidebar component will update
 
   const toggleSidebar = () => {
     if (window.innerWidth < 1024) {
@@ -44,7 +47,7 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   return (
-    <LayoutContext.Provider value={{ isSidebarCollapsed, isMobileSidebarOpen, toggleSidebar, closeMobileSidebar }}>
+    <LayoutContext.Provider value={{ isSidebarCollapsed, isMobileSidebarOpen, showSidebar, toggleSidebar, closeMobileSidebar, setShowSidebar }}>
       {children}
     </LayoutContext.Provider>
   );

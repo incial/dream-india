@@ -11,7 +11,7 @@ import { Search, DollarSign, FileText, Calendar, Building2, MapPin, Send, CheckC
 export const SalesCoordinatorPage: React.FC = () => {
     const { user } = useAuth();
     const { showToast } = useToast();
-    const { isSidebarCollapsed } = useLayout();
+    const { isSidebarCollapsed, showSidebar } = useLayout();
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -74,7 +74,7 @@ export const SalesCoordinatorPage: React.FC = () => {
         <div className="flex min-h-screen mesh-bg relative">
             <div className="glass-canvas" />
             <Sidebar />
-            <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-in-out ${isSidebarCollapsed ? 'lg:ml-28' : 'lg:ml-80'}`}>
+            <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-in-out ${!showSidebar ? 'lg:ml-0' : isSidebarCollapsed ? 'lg:ml-28' : 'lg:ml-80'}`}>
                 <Navbar />
                 
                 <div className="px-4 lg:px-12 py-6 lg:py-10 pb-32">

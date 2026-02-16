@@ -48,7 +48,7 @@ const NavItem = ({ icon: Icon, label, to, active, collapsed }: { icon: any, labe
 export const Sidebar: React.FC = () => {
     const location = useLocation();
     const { user, logout } = useAuth();
-    const { isSidebarCollapsed, isMobileSidebarOpen, closeMobileSidebar } = useLayout();
+    const { isSidebarCollapsed, isMobileSidebarOpen, closeMobileSidebar, setShowSidebar } = useLayout();
     const currentPath = location.pathname;
     
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -74,6 +74,33 @@ export const Sidebar: React.FC = () => {
     const isSales = role === 'ROLE_SALES_COORDINATOR' || isAdmin;
     const isAccounts = role === 'ROLE_ACCOUNTS' || isAdmin;
     const isInstallation = role === 'ROLE_INSTALLATION' || isAdmin;
+
+    // Count visible navigation items
+    let navItemCount = 0;
+    if (isSuperAdmin) {
+        navItemCount = 2; // Dashboard + Reports
+    } else {
+        if (isExecutive) navItemCount++;     // Projects
+        if (isSales) navItemCount++;         // Sales
+        if (isAccounts) navItemCount++;      // Accounts
+        if (isInstallation) navItemCount++;  // Installation
+        if (isAdmin && !isExecutive && !isSales && !isAccounts && !isInstallation) {
+            // Pure admin (not combined with other roles) gets Completed
+            navItemCount++;
+        }
+    }
+
+    // Update context with sidebar visibility
+    useLayoutEffect(() => {
+        const shouldShow = navItemCount > 1 || isMobileSidebarOpen;
+        setShowSidebar(shouldShow);
+    }, [navItemCount, isMobileSidebarOpen, setShowSidebar]);
+
+    // Auto-hide sidebar if only 1 navigation item (no navigation needed)
+    // Still show on mobile when explicitly opened
+    if (navItemCount <= 1 && !isMobileSidebarOpen) {
+        return null;
+    }
 
   return (
     <>

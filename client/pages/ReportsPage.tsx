@@ -19,7 +19,7 @@ import {
 import { Analytics } from '../types';
 
 export const ReportsPage: React.FC = () => {
-  const { isSidebarCollapsed } = useLayout();
+  const { isSidebarCollapsed, showSidebar } = useLayout();
   const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
@@ -102,7 +102,7 @@ export const ReportsPage: React.FC = () => {
       <div className="flex min-h-screen mesh-bg relative">
         <div className="glass-canvas" />
         <Sidebar />
-        <div className={`flex-1 flex items-center justify-center transition-all duration-500 ${isSidebarCollapsed ? 'lg:ml-28' : 'lg:ml-80'}`}>
+        <div className={`flex-1 flex items-center justify-center transition-all duration-500 ${!showSidebar ? 'lg:ml-0' : isSidebarCollapsed ? 'lg:ml-28' : 'lg:ml-80'}`}>
           <div className="text-center">
             <Activity className="h-12 w-12 text-brand-500 animate-spin mx-auto mb-4" />
             <p className="text-gray-600 font-medium">Loading reports...</p>
@@ -117,7 +117,7 @@ export const ReportsPage: React.FC = () => {
       <div className="flex min-h-screen mesh-bg relative">
         <div className="glass-canvas" />
         <Sidebar />
-        <div className={`flex-1 flex items-center justify-center transition-all duration-500 ${isSidebarCollapsed ? 'lg:ml-28' : 'lg:ml-80'}`}>
+        <div className={`flex-1 flex items-center justify-center transition-all duration-500 ${!showSidebar ? 'lg:ml-0' : isSidebarCollapsed ? 'lg:ml-28' : 'lg:ml-80'}`}>
           <div className="text-center">
             <p className="text-gray-600 font-medium">No data available</p>
           </div>
@@ -134,7 +134,7 @@ export const ReportsPage: React.FC = () => {
       <div className="glass-canvas" />
       <Sidebar />
       
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-in-out ${isSidebarCollapsed ? 'lg:ml-28' : 'lg:ml-80'}`}>
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-in-out ${!showSidebar ? 'lg:ml-0' : isSidebarCollapsed ? 'lg:ml-28' : 'lg:ml-80'}`}>
         <Navbar />
         
         <div className="px-4 lg:px-12 py-6 lg:py-10 pb-32">

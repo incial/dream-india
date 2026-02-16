@@ -15,7 +15,7 @@ import { useLayout } from '../context/LayoutContext';
 export const CompaniesPage: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
-  const { isSidebarCollapsed } = useLayout();
+  const { isSidebarCollapsed, showSidebar } = useLayout();
   const [crmEntries, setCrmEntries] = useState<CRMEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'active' | 'dropped' | 'past'>('active');
@@ -144,7 +144,7 @@ export const CompaniesPage: React.FC = () => {
     <div className="flex min-h-screen mesh-bg relative">
       <div className="glass-canvas" />
       <Sidebar />
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-in-out ${isSidebarCollapsed ? 'lg:ml-28' : 'lg:ml-80'}`}>
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-in-out ${!showSidebar ? 'lg:ml-0' : isSidebarCollapsed ? 'lg:ml-28' : 'lg:ml-80'}`}>
         <Navbar />
         
         <div className="px-4 lg:px-12 py-6 lg:py-10 pb-32">
