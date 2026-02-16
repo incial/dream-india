@@ -1,0 +1,16 @@
+package com.incial.crm.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class StageDistributionDto {
+    private String stage;
+    private Long count;
+    private Double percentage;
+}
