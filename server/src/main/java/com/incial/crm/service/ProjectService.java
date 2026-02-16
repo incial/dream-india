@@ -27,6 +27,9 @@ public class ProjectService {
     @Autowired
     private ProjectStageHistoryRepository stageHistoryRepository;
 
+    @Autowired(required = false)
+    private AlertService alertService;
+
     // Stage definitions
     private static final String STAGE_LEAD = "LEAD";
     private static final String STAGE_ON_PROGRESS = "ON_PROGRESS";
@@ -51,9 +54,9 @@ public class ProjectService {
         // Check for duplicate contact number
         if (request.getContactNumber() != null && !request.getContactNumber().isEmpty()) {
             projectRepository.findByContactNumber(request.getContactNumber())
-                .ifPresent(p -> {
-                    throw new RuntimeException("A project with this contact number already exists");
-                });
+                    .ifPresent(p -> {
+                        throw new RuntimeException("A project with this contact number already exists");
+                    });
         }
 
         Project project = Project.builder()
@@ -93,10 +96,10 @@ public class ProjectService {
             throw new RuntimeException("Cannot modify locked project");
         }
 
-        if (!STAGE_LEAD.equals(project.getCurrentStage()) && 
-            !STAGE_ON_PROGRESS.equals(project.getCurrentStage()) &&
-            !STAGE_QUOTATION_SENT.equals(project.getCurrentStage()) &&
-            !STAGE_IN_REVIEW.equals(project.getCurrentStage())) {
+        if (!STAGE_LEAD.equals(project.getCurrentStage()) &&
+                !STAGE_ON_PROGRESS.equals(project.getCurrentStage()) &&
+                !STAGE_QUOTATION_SENT.equals(project.getCurrentStage()) &&
+                !STAGE_IN_REVIEW.equals(project.getCurrentStage())) {
             throw new RuntimeException("Executive can only edit projects in LEAD, ON_PROGRESS, QUOTATION_SENT, or IN_REVIEW stages");
         }
 
@@ -126,8 +129,10 @@ public class ProjectService {
 
         String fromStage = project.getCurrentStage();
 
-        // Validate stage transition
-        validateStageTransition(fromStage, toStage, changedByRole);
+        // Validate stage transition (skip for system-triggered transitions)
+        if (!isSystemTriggered) {
+            validateStageTransition(fromStage, toStage, changedByRole);
+        }
 
         // Update stage
         project.setPreviousStage(fromStage);
@@ -139,8 +144,8 @@ public class ProjectService {
         // Update owner role based on stage
         updateOwnerRole(project, toStage);
 
-        // Lock project if onboarded (no more executive editing)
-        if (STAGE_ONBOARDED.equals(toStage)) {
+        // Lock project when it moves to SALES (after onboarding automation)
+        if (STAGE_SALES.equals(toStage)) {
             project.setIsLocked(true);
         }
 
@@ -153,6 +158,19 @@ public class ProjectService {
 
         // Log stage change
         logStageChange(project.getId(), fromStage, toStage, changedBy, changedByRole, remarks, isSystemTriggered);
+
+        // Auto-dismiss alerts when project moves to next stage
+        if (alertService != null) {
+            if (STAGE_IN_REVIEW.equals(fromStage)) {
+                alertService.autoDismissAlertsForProject(project.getId(), com.incial.crm.entity.ProjectAlert.AlertType.STAGE_INACTIVITY);
+            }
+            if (STAGE_ACCOUNTS.equals(fromStage)) {
+                alertService.autoDismissAlertsForProject(project.getId(), com.incial.crm.entity.ProjectAlert.AlertType.PAYMENT_DELAY);
+            }
+            if (STAGE_INSTALLATION.equals(fromStage)) {
+                alertService.autoDismissAlertsForProject(project.getId(), com.incial.crm.entity.ProjectAlert.AlertType.INSTALLATION_DELAY);
+            }
+        }
 
         // Trigger automation if necessary (only if not already system triggered to prevent recursion)
         if (!isSystemTriggered) {
@@ -169,6 +187,21 @@ public class ProjectService {
             if (STAGE_ON_PROGRESS.equals(fromStage) && STAGE_QUOTATION_SENT.equals(toStage)) return;
             if (STAGE_QUOTATION_SENT.equals(fromStage) && STAGE_IN_REVIEW.equals(toStage)) return;
             if (STAGE_IN_REVIEW.equals(fromStage) && STAGE_ONBOARDED.equals(toStage)) return;
+        }
+
+        // Sales Coordinator can transition: SALES -> ACCOUNTS
+        if (ROLE_SALES.equals(userRole) || ROLE_ADMIN.equals(userRole) || ROLE_SUPER_ADMIN.equals(userRole)) {
+            if (STAGE_SALES.equals(fromStage) && STAGE_ACCOUNTS.equals(toStage)) return;
+        }
+
+        // Accounts can transition: ACCOUNTS -> INSTALLATION
+        if (ROLE_ACCOUNTS.equals(userRole) || ROLE_ADMIN.equals(userRole) || ROLE_SUPER_ADMIN.equals(userRole)) {
+            if (STAGE_ACCOUNTS.equals(fromStage) && STAGE_INSTALLATION.equals(toStage)) return;
+        }
+
+        // Installation can transition: INSTALLATION -> COMPLETED
+        if (ROLE_INSTALLATION.equals(userRole) || ROLE_ADMIN.equals(userRole) || ROLE_SUPER_ADMIN.equals(userRole)) {
+            if (STAGE_INSTALLATION.equals(fromStage) && STAGE_COMPLETED.equals(toStage)) return;
         }
 
         // Super Admin can override
@@ -339,10 +372,10 @@ public class ProjectService {
     public List<ProjectDto> getExecutiveProjects(String executiveName) {
         return projectRepository.findByCreatedBy(executiveName).stream()
                 .filter(p -> p.getCurrentStage().equals(STAGE_LEAD) ||
-                           p.getCurrentStage().equals(STAGE_ON_PROGRESS) ||
-                           p.getCurrentStage().equals(STAGE_QUOTATION_SENT) ||
-                           p.getCurrentStage().equals(STAGE_IN_REVIEW) ||
-                           p.getCurrentStage().equals(STAGE_ONBOARDED))
+                        p.getCurrentStage().equals(STAGE_ON_PROGRESS) ||
+                        p.getCurrentStage().equals(STAGE_QUOTATION_SENT) ||
+                        p.getCurrentStage().equals(STAGE_IN_REVIEW) ||
+                        p.getCurrentStage().equals(STAGE_ONBOARDED))
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -371,8 +404,8 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
-    private void logActivity(Long projectId, String actionType, String fieldName, String oldValue, String newValue, 
-                            String performedBy, String performedByRole, String remarks) {
+    private void logActivity(Long projectId, String actionType, String fieldName, String oldValue, String newValue,
+                             String performedBy, String performedByRole, String remarks) {
         ProjectActivityLog log = ProjectActivityLog.builder()
                 .projectId(projectId)
                 .actionType(actionType)
@@ -386,7 +419,7 @@ public class ProjectService {
         activityLogRepository.save(log);
     }
 
-    private void logStageChange(Long projectId, String fromStage, String toStage, String changedBy, 
+    private void logStageChange(Long projectId, String fromStage, String toStage, String changedBy,
                                 String changedByRole, String remarks, boolean isSystemTriggered) {
         ProjectStageHistory history = ProjectStageHistory.builder()
                 .projectId(projectId)

@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, ChevronDown, PanelLeft, Search, User, LogOut } from 'lucide-react';
+import { Bell, ChevronDown, PanelLeft, Search, User, LogOut, AlertTriangle, Clock, XCircle } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
+import { alertApi } from '../../services/api';
+import { Alert, AlertSeverity } from '../../types';
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
@@ -11,9 +13,58 @@ export const Navbar: React.FC = () => {
   
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [alertCount, setAlertCount] = useState(0);
   
   const profileRef = useRef<HTMLDivElement>(null);
   const notifyRef = useRef<HTMLDivElement>(null);
+
+  // Load alerts for admin users
+  useEffect(() => {
+    if (user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_SUPER_ADMIN') {
+      loadAlerts();
+      // Refresh alerts every 5 minutes
+      const interval = setInterval(loadAlerts, 5 * 60 * 1000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const loadAlerts = async () => {
+    try {
+      const data = await alertApi.getActiveAlerts();
+      setAlerts(data.slice(0, 5)); // Show only top 5
+      setAlertCount(data.length);
+    } catch (error) {
+      console.error('Failed to load alerts:', error);
+    }
+  };
+
+  const handleDismissAlert = async (alertId: number) => {
+    try {
+      await alertApi.dismissAlert(alertId);
+      loadAlerts(); // Reload alerts after dismissal
+    } catch (error) {
+      console.error('Failed to dismiss alert:', error);
+    }
+  };
+
+  const getSeverityColor = (severity: AlertSeverity) => {
+    switch (severity) {
+      case 'CRITICAL': return 'text-red-600 bg-red-100';
+      case 'WARNING': return 'text-yellow-600 bg-yellow-100';
+      case 'INFO': return 'text-blue-600 bg-blue-100';
+      default: return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  const getSeverityIcon = (severity: AlertSeverity) => {
+    switch (severity) {
+      case 'CRITICAL': return <AlertTriangle className="h-4 w-4" />;
+      case 'WARNING': return <Clock className="h-4 w-4" />;
+      case 'INFO': return <Bell className="h-4 w-4" />;
+      default: return <Bell className="h-4 w-4" />;
+    }
+  };
 
   // Close dropdowns on click outside
   useEffect(() => {
@@ -79,25 +130,73 @@ export const Navbar: React.FC = () => {
                     className={`p-3 lg:p-4 glass-panel rounded-2xl lg:rounded-3xl shadow-premium transition-all relative group border-white/40 ${isNotificationsOpen ? 'bg-white/80 ring-2 ring-indigo-500/20' : 'text-slate-500 hover:text-slate-900'}`}
                 >
                     <Bell className={`h-5 w-5 lg:h-6 lg:w-6 ${isNotificationsOpen ? 'text-indigo-600' : 'group-hover:animate-bounce'}`} />
-                    <span className="absolute top-3 right-3 lg:top-4 lg:right-4 h-2 lg:h-2.5 w-2 lg:w-2.5 rounded-full bg-indigo-500 border-[3px] border-white shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
+                    {alertCount > 0 && (
+                        <span className="absolute top-2 right-2 lg:top-3 lg:right-3 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 border-2 border-white shadow-lg text-[10px] font-bold text-white">
+                            {alertCount > 9 ? '9+' : alertCount}
+                        </span>
+                    )}
                 </button>
 
                 {isNotificationsOpen && (
-                    <div className="absolute right-0 mt-4 w-72 lg:w-80 bg-white/90 backdrop-blur-2xl rounded-[2.5rem] border border-white/60 shadow-2xl p-6 lg:p-8 animate-in fade-in zoom-in-95 duration-200 origin-top-right ring-1 ring-white/50">
+                    <div className="absolute right-0 mt-4 w-96 bg-white/90 backdrop-blur-2xl rounded-[2.5rem] border border-white/60 shadow-2xl p-6 lg:p-8 animate-in fade-in zoom-in-95 duration-200 origin-top-right ring-1 ring-white/50 max-h-[500px] overflow-y-auto">
                         <div className="flex items-center justify-between mb-6 lg:mb-8">
-                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Signal Intelligence</h3>
-                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,1)]" />
+                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Project Alerts</h3>
+                            {alertCount > 0 && (
+                                <div className="flex items-center gap-2">
+                                    <div className="h-1.5 w-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,1)] animate-pulse" />
+                                    <span className="text-[10px] font-bold text-red-600">{alertCount} Active</span>
+                                </div>
+                            )}
                         </div>
-                        <div className="flex flex-col items-center justify-center py-6 lg:py-10 text-center">
-                            <div className="relative mb-6">
-                                <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-xl animate-pulse" />
-                                <Bell className="h-10 w-10 lg:h-12 lg:w-12 text-indigo-500 relative z-10" />
+                        
+                        {alerts.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-10 text-center">
+                                <div className="relative mb-6">
+                                    <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-xl animate-pulse" />
+                                    <Bell className="h-10 w-10 lg:h-12 lg:w-12 text-indigo-500 relative z-10" />
+                                </div>
+                                <p className="text-sm font-bold text-slate-900">All Systems Nominal</p>
+                                <p className="text-[10px] font-medium text-slate-400 mt-2 uppercase tracking-widest leading-relaxed">No high-priority alerts <br/> detected in this cycle.</p>
                             </div>
-                            <p className="text-sm font-bold text-slate-900">All Systems Nominal</p>
-                            <p className="text-[10px] font-medium text-slate-400 mt-2 uppercase tracking-widest leading-relaxed">No high-priority alerts <br/> detected in this cycle.</p>
-                        </div>
-                        <button className="w-full mt-4 lg:mt-6 py-3 bg-slate-50 hover:bg-slate-100 rounded-2xl text-[10px] font-black text-slate-500 uppercase tracking-widest transition-colors">
-                            View Log Archive
+                        ) : (
+                            <div className="space-y-3">
+                                {alerts.map((alert) => (
+                                    <div key={alert.id} className="bg-white/60 rounded-2xl p-4 border border-gray-100 hover:border-gray-200 transition-all">
+                                        <div className="flex items-start justify-between mb-2">
+                                            <div className={`flex items-center gap-2 px-2 py-1 rounded-lg ${getSeverityColor(alert.severity)}`}>
+                                                {getSeverityIcon(alert.severity)}
+                                                <span className="text-[10px] font-bold uppercase">{alert.severity}</span>
+                                            </div>
+                                            <button
+                                                onClick={() => handleDismissAlert(alert.id)}
+                                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                                                title="Dismiss"
+                                            >
+                                                <XCircle className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                        <p className="text-sm font-semibold text-gray-900 mb-1">{alert.projectName}</p>
+                                        <p className="text-xs text-gray-600 leading-relaxed mb-2">{alert.message}</p>
+                                        <div className="flex items-center justify-between text-[10px]">
+                                            <span className="text-gray-500">
+                                                {new Date(alert.createdAt).toLocaleDateString()}
+                                            </span>
+                                            {alert.daysOverdue > 0 && (
+                                                <span className="text-red-600 font-bold">
+                                                    {alert.daysOverdue} days overdue
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        
+                        <button 
+                            className="w-full mt-4 lg:mt-6 py-3 bg-slate-50 hover:bg-slate-100 rounded-2xl text-[10px] font-black text-slate-500 uppercase tracking-widest transition-colors"
+                            onClick={() => {/* Navigate to alerts page */}}
+                        >
+                            View All Alerts
                         </button>
                     </div>
                 )}

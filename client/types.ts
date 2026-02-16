@@ -269,6 +269,37 @@ export interface Project {
   isLocked?: boolean;
 }
 
+// Alert System Types
+export type AlertType = 
+  | 'STAGE_INACTIVITY' 
+  | 'PAYMENT_DELAY' 
+  | 'INSTALLATION_DELAY' 
+  | 'DUPLICATE_LEAD' 
+  | 'UNAUTHORIZED_EDIT';
+
+export type AlertSeverity = 'INFO' | 'WARNING' | 'CRITICAL';
+
+export interface Alert {
+  id: number;
+  projectId: number;
+  projectName: string;
+  alertType: AlertType;
+  severity: AlertSeverity;
+  message: string;
+  createdAt: string;
+  dismissedAt?: string;
+  dismissedBy?: string;
+  isActive: boolean;
+  daysOverdue: number;
+}
+
+export interface AlertSummary {
+  totalAlerts: number;
+  criticalAlerts: number;
+  warningAlerts: number;
+  infoAlerts: number;
+}
+
 export interface CreateProjectRequest {
   school: string;
   contactPerson?: string;

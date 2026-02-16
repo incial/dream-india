@@ -1,6 +1,6 @@
 
 import React, { useRef, useLayoutEffect } from 'react';
-import { Users, Briefcase, LogOut, X, FolderKanban, DollarSign, CreditCard, Wrench, Archive } from 'lucide-react';
+import { LogOut, X, FolderKanban, DollarSign, CreditCard, Wrench, Archive, BarChart3 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
@@ -67,7 +67,8 @@ export const Sidebar: React.FC = () => {
     };
     
     const role = user?.role;
-    const isAdmin = role === 'ROLE_ADMIN' || role === 'ROLE_SUPER_ADMIN';
+    const isSuperAdmin = role === 'ROLE_SUPER_ADMIN';
+    const isAdmin = role === 'ROLE_ADMIN';
     const isEmployee = role === 'ROLE_EMPLOYEE' || isAdmin;
     const isExecutive = role === 'ROLE_EXECUTIVE' || isAdmin;
     const isSales = role === 'ROLE_SALES_COORDINATOR' || isAdmin;
@@ -120,19 +121,28 @@ export const Sidebar: React.FC = () => {
                 className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar px-3 lg:px-4 space-y-8 lg:space-y-12 relative z-10" 
                 onClick={() => window.innerWidth < 1024 && closeMobileSidebar()}
             >
-                <div className="space-y-1 lg:space-y-2">
-                    {!isSidebarCollapsed && (
-                        <p className="px-4 lg:px-6 text-[10px] lg:text-[11px] font-black text-slate-600 uppercase tracking-[0.4em] mb-3 lg:mb-6">Core Operations</p>
-                    )}
-                    
-                    {isExecutive && <NavItem collapsed={isSidebarCollapsed} icon={FolderKanban} label="Projects" to="/projects" active={currentPath.startsWith('/projects')} />}
-                    {isSales && <NavItem collapsed={isSidebarCollapsed} icon={DollarSign} label="Sales" to="/sales" active={currentPath.startsWith('/sales')} />}
-                    {isAccounts && <NavItem collapsed={isSidebarCollapsed} icon={CreditCard} label="Accounts" to="/accounts" active={currentPath.startsWith('/accounts')} />}
-                    {isInstallation && <NavItem collapsed={isSidebarCollapsed} icon={Wrench} label="Installation" to="/installation" active={currentPath.startsWith('/installation')} />}
-                    <NavItem collapsed={isSidebarCollapsed} icon={Archive} label="Completed" to="/completed" active={currentPath.startsWith('/completed')} />
-                    {isAdmin && <NavItem collapsed={isSidebarCollapsed} icon={Users} label="Pipeline" to="/crm" active={currentPath === '/crm'} />}
-                    {isEmployee && <NavItem collapsed={isSidebarCollapsed} icon={Briefcase} label="Registry" to="/companies" active={currentPath.startsWith('/companies')} />}
-                </div>
+                {isSuperAdmin ? (
+                    // Super Admin Navigation - Analytics Only
+                    <div className="space-y-1 lg:space-y-2">
+                        {!isSidebarCollapsed && (
+                            <p className="px-4 lg:px-6 text-[10px] lg:text-[11px] font-black text-slate-600 uppercase tracking-[0.4em] mb-3 lg:mb-6">Analytics & Insights</p>
+                        )}
+                        <NavItem collapsed={isSidebarCollapsed} icon={BarChart3} label="Dashboard" to="/dashboard" active={currentPath.startsWith('/dashboard')} />
+                    </div>
+                ) : (
+                    // Admin and Other Roles - Operational Pages
+                    <div className="space-y-1 lg:space-y-2">
+                        {!isSidebarCollapsed && (
+                            <p className="px-4 lg:px-6 text-[10px] lg:text-[11px] font-black text-slate-600 uppercase tracking-[0.4em] mb-3 lg:mb-6">Core Operations</p>
+                        )}
+                        
+                        {isExecutive && <NavItem collapsed={isSidebarCollapsed} icon={FolderKanban} label="Projects" to="/projects" active={currentPath.startsWith('/projects')} />}
+                        {isSales && <NavItem collapsed={isSidebarCollapsed} icon={DollarSign} label="Sales" to="/sales" active={currentPath.startsWith('/sales')} />}
+                        {isAccounts && <NavItem collapsed={isSidebarCollapsed} icon={CreditCard} label="Accounts" to="/accounts" active={currentPath.startsWith('/accounts')} />}
+                        {isInstallation && <NavItem collapsed={isSidebarCollapsed} icon={Wrench} label="Installation" to="/installation" active={currentPath.startsWith('/installation')} />}
+                        <NavItem collapsed={isSidebarCollapsed} icon={Archive} label="Completed" to="/completed" active={currentPath.startsWith('/completed')} />
+                    </div>
+                )}
             </div>
 
             <div className="mt-auto p-3 lg:p-4 space-y-4 lg:space-y-5 relative z-10 bg-slate-950/50 backdrop-blur-md border-t border-white/5 overflow-hidden">

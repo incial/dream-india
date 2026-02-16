@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CRMEntry, AuthResponse, User, ForgotPasswordRequest, VerifyOtpRequest, ChangePasswordRequest, UpdatePasswordRequest, ApiResponse, RegisterRequest, Project, CreateProjectRequest, UpdateSalesDataRequest, UpdateAccountsDataRequest, UpdateInstallationDataRequest, StageTransitionRequest, ProjectStage } from '../types';
+import { CRMEntry, AuthResponse, User, ForgotPasswordRequest, VerifyOtpRequest, ChangePasswordRequest, UpdatePasswordRequest, ApiResponse, RegisterRequest, Project, CreateProjectRequest, UpdateSalesDataRequest, UpdateAccountsDataRequest, UpdateInstallationDataRequest, StageTransitionRequest, ProjectStage, Alert, AlertSummary } from '../types';
 
 // ============================================================================
 // ⚙️ API CONFIGURATION
@@ -394,6 +394,50 @@ export const projectApi = {
     try {
         const res = await api.get(`/projects/stage/${stage}`);
         return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  }
+};
+
+// ============================================================================
+// 🔔 ALERTS API
+// ============================================================================
+
+export const alertApi = {
+  // Get All Active Alerts (Admin only)
+  getActiveAlerts: async (): Promise<Alert[]> => {
+    try {
+        const res = await api.get("/alerts");
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Get Alerts for a Specific Project
+  getProjectAlerts: async (projectId: number): Promise<Alert[]> => {
+    try {
+        const res = await api.get(`/alerts/project/${projectId}`);
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Get Alert Summary Statistics
+  getAlertSummary: async (): Promise<AlertSummary> => {
+    try {
+        const res = await api.get("/alerts/summary");
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Manually Trigger Alert Generation (Admin only)
+  generateAlerts: async (): Promise<void> => {
+    try {
+        await api.post("/alerts/generate");
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Dismiss an Alert
+  dismissAlert: async (alertId: number): Promise<void> => {
+    try {
+        await api.post(`/alerts/${alertId}/dismiss`);
     } catch (error) { throw handleApiError(error); }
   }
 };
