@@ -141,7 +141,7 @@ export const Sidebar: React.FC = () => {
                         {isSales && <NavItem collapsed={isSidebarCollapsed} icon={DollarSign} label="Sales" to="/sales" active={currentPath.startsWith('/sales')} />}
                         {isAccounts && <NavItem collapsed={isSidebarCollapsed} icon={CreditCard} label="Accounts" to="/accounts" active={currentPath.startsWith('/accounts')} />}
                         {isInstallation && <NavItem collapsed={isSidebarCollapsed} icon={Wrench} label="Installation" to="/installation" active={currentPath.startsWith('/installation')} />}
-                        <NavItem collapsed={isSidebarCollapsed} icon={Archive} label="Completed" to="/completed" active={currentPath.startsWith('/completed')} />
+                        {isAdmin && <NavItem collapsed={isSidebarCollapsed} icon={Archive} label="Completed" to="/completed" active={currentPath.startsWith('/completed')} />}
                     </div>
                 )}
             </div>

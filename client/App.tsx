@@ -119,8 +119,8 @@ const RootRedirect: React.FC = () => {
             return <Navigate to="/dashboard" replace />;
         
         case 'ROLE_ADMIN':
-            // Admin goes to CRM/Pipeline for operations management
-            return <Navigate to="/crm" replace />;
+            // Admin goes to Projects for operations management
+            return <Navigate to="/projects" replace />;
         
         case 'ROLE_EXECUTIVE':
             return <Navigate to="/projects" replace />;
@@ -205,11 +205,11 @@ const AppRoutes = () => {
                 </InstallationRoute>
             } />
             
-            {/* Work Completed Archive - All authenticated users */}
+            {/* Work Completed Archive - Admin and Super Admin only */}
             <Route path="/completed" element={
-                <OperationalRoute>
+                <AdminRoute>
                     <WorkCompletedPage />
-                </OperationalRoute>
+                </AdminRoute>
             } />
             
             {/* Pipeline - Admin and Super Admin only */}
