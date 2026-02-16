@@ -15,8 +15,20 @@ import { SalesCoordinatorPage } from './pages/SalesCoordinatorPage';
 import { AccountsPage } from './pages/AccountsPage';
 import { InstallationPage } from './pages/InstallationPage';
 import { WorkCompletedPage } from './pages/WorkCompletedPage';
+import { DashboardPage } from './pages/DashboardPage';
 
-// Admin Route (Super Admin + Admin) - For CRM/Pipeline
+// Super Admin Route - For Analytics Dashboard Only
+const SuperAdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+    const { isAuthenticated, user } = useAuth();
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    
+    if (user?.role === 'ROLE_SUPER_ADMIN') {
+        return children;
+    }
+    return <Navigate to="/unauthorized" replace />;
+};
+
+// Admin Route (Admin + Super Admin) - For CRM/Pipeline and overview pages
 const AdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
     const { isAuthenticated, user } = useAuth();
     if (!isAuthenticated) return <Navigate to="/login" replace />;
@@ -27,45 +39,45 @@ const AdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) =>
     return <Navigate to="/unauthorized" replace />;
 };
 
-// Executive Route - For Project Management
+// Executive Route - For Project Management (ADMIN only, not SUPER_ADMIN)
 const ExecutiveRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
     const { isAuthenticated, user } = useAuth();
     if (!isAuthenticated) return <Navigate to="/login" replace />;
     
-    if (user?.role === 'ROLE_EXECUTIVE' || user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_SUPER_ADMIN') {
+    if (user?.role === 'ROLE_EXECUTIVE' || user?.role === 'ROLE_ADMIN') {
         return children;
     }
     return <Navigate to="/unauthorized" replace />;
 };
 
-// Sales Route - For Sales Coordinator
+// Sales Route - For Sales Coordinator (ADMIN only, not SUPER_ADMIN)
 const SalesRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
     const { isAuthenticated, user } = useAuth();
     if (!isAuthenticated) return <Navigate to="/login" replace />;
     
-    if (user?.role === 'ROLE_SALES_COORDINATOR' || user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_SUPER_ADMIN') {
+    if (user?.role === 'ROLE_SALES_COORDINATOR' || user?.role === 'ROLE_ADMIN') {
         return children;
     }
     return <Navigate to="/unauthorized" replace />;
 };
 
-// Accounts Route - For Accounts Department
+// Accounts Route - For Accounts Department (ADMIN only, not SUPER_ADMIN)
 const AccountsRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
     const { isAuthenticated, user } = useAuth();
     if (!isAuthenticated) return <Navigate to="/login" replace />;
     
-    if (user?.role === 'ROLE_ACCOUNTS' || user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_SUPER_ADMIN') {
+    if (user?.role === 'ROLE_ACCOUNTS' || user?.role === 'ROLE_ADMIN') {
         return children;
     }
     return <Navigate to="/unauthorized" replace />;
 };
 
-// Installation Route - For Installation Team
+// Installation Route - For Installation Team (ADMIN only, not SUPER_ADMIN)
 const InstallationRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
     const { isAuthenticated, user } = useAuth();
     if (!isAuthenticated) return <Navigate to="/login" replace />;
     
-    if (user?.role === 'ROLE_INSTALLATION' || user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_SUPER_ADMIN') {
+    if (user?.role === 'ROLE_INSTALLATION' || user?.role === 'ROLE_ADMIN') {
         return children;
     }
     return <Navigate to="/unauthorized" replace />;
@@ -82,20 +94,56 @@ const OperationalRoute: React.FC<{ children: React.ReactElement }> = ({ children
     return children;
 };
 
-// Public Route (Redirects to CRM if already logged in)
+// Public Route (Redirects to appropriate page if already logged in)
 const PublicRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
     const { isAuthenticated } = useAuth();
     if (isAuthenticated) {
-        return <Navigate to="/crm" replace />;
+        // Use root redirect which handles role-based routing
+        return <Navigate to="/" replace />;
     }
     return children;
 };
 
-// Root Redirect Logic
+// Root Redirect Logic - Routes users to appropriate default page based on role
 const RootRedirect: React.FC = () => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     if (!isAuthenticated) return <Navigate to="/login" replace />;
-    return <Navigate to="/crm" replace />;
+    
+    // Route based on user role to their primary workspace
+    const role = user?.role;
+    
+    switch (role) {
+        case 'ROLE_SUPER_ADMIN':
+            // Super Admin goes to analytics dashboard
+            return <Navigate to="/dashboard" replace />;
+        
+        case 'ROLE_ADMIN':
+            // Admin goes to CRM/Pipeline for operations management
+            return <Navigate to="/crm" replace />;
+        
+        case 'ROLE_EXECUTIVE':
+            return <Navigate to="/projects" replace />;
+        
+        case 'ROLE_SALES_COORDINATOR':
+            return <Navigate to="/sales" replace />;
+        
+        case 'ROLE_ACCOUNTS':
+            return <Navigate to="/accounts" replace />;
+        
+        case 'ROLE_INSTALLATION':
+            return <Navigate to="/installation" replace />;
+        
+        case 'ROLE_EMPLOYEE':
+            return <Navigate to="/companies" replace />;
+        
+        case 'ROLE_CLIENT':
+            // Clients have limited access - redirect to unauthorized
+            return <Navigate to="/unauthorized" replace />;
+        
+        default:
+            // Fallback for unknown roles
+            return <Navigate to="/projects" replace />;
+    }
 };
 
 const AppRoutes = () => {
@@ -112,6 +160,13 @@ const AppRoutes = () => {
                 <PublicRoute>
                     <ForgotPasswordPage />
                 </PublicRoute>
+            } />
+            
+            {/* Dashboard - Super Admin Only */}
+            <Route path="/dashboard" element={
+                <SuperAdminRoute>
+                    <DashboardPage />
+                </SuperAdminRoute>
             } />
             
             {/* Projects - Executive Module */}

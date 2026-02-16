@@ -33,7 +33,7 @@ export const LoginPage: React.FC = () => {
     const isGsiInitializedRef = useRef(false);
 
     // Safe access to env variable or fallback
-    const GOOGLE_CLIENT_ID = "612147431690-rujtu9sdmtp35oerpfj0t1lv8u2pc27o.apps.googleusercontent.com";
+    const GOOGLE_CLIENT_ID = "612147431690-cge4vqi1irkhb99u3hc3kuu6224tc0dg.apps.googleusercontent.com";
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
