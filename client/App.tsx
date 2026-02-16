@@ -16,6 +16,7 @@ import { AccountsPage } from './pages/AccountsPage';
 import { InstallationPage } from './pages/InstallationPage';
 import { WorkCompletedPage } from './pages/WorkCompletedPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { ReportsPage } from './pages/ReportsPage';
 
 // Super Admin Route - For Analytics Dashboard Only
 const SuperAdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -166,6 +167,13 @@ const AppRoutes = () => {
             <Route path="/dashboard" element={
                 <SuperAdminRoute>
                     <DashboardPage />
+                </SuperAdminRoute>
+            } />
+            
+            {/* Reports - Super Admin Only */}
+            <Route path="/reports" element={
+                <SuperAdminRoute>
+                    <ReportsPage />
                 </SuperAdminRoute>
             } />
             

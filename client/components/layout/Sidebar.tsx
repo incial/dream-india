@@ -1,6 +1,6 @@
 
 import React, { useRef, useLayoutEffect } from 'react';
-import { LogOut, X, FolderKanban, DollarSign, CreditCard, Wrench, Archive, BarChart3 } from 'lucide-react';
+import { LogOut, X, FolderKanban, DollarSign, CreditCard, Wrench, Archive, BarChart3, FileText } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
@@ -128,6 +128,7 @@ export const Sidebar: React.FC = () => {
                             <p className="px-4 lg:px-6 text-[10px] lg:text-[11px] font-black text-slate-600 uppercase tracking-[0.4em] mb-3 lg:mb-6">Analytics & Insights</p>
                         )}
                         <NavItem collapsed={isSidebarCollapsed} icon={BarChart3} label="Dashboard" to="/dashboard" active={currentPath.startsWith('/dashboard')} />
+                        <NavItem collapsed={isSidebarCollapsed} icon={FileText} label="Reports" to="/reports" active={currentPath.startsWith('/reports')} />
                     </div>
                 ) : (
                     // Admin and Other Roles - Operational Pages

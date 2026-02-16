@@ -4,7 +4,7 @@ import { Sidebar } from '../components/layout/Sidebar';
 import { useLayout } from '../context/LayoutContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { projectApi } from '../services/api';
+import { analyticsApi } from '../services/api';
 import { 
   TrendingUp, 
   DollarSign, 
@@ -20,7 +20,7 @@ import {
   PieChart,
   Activity
 } from 'lucide-react';
-import { Project } from '../types';
+import { Analytics, StageDistribution, MonthlyTrend } from '../types';
 
 interface DashboardStats {
   totalProjects: number;
@@ -39,7 +39,7 @@ export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
     totalProjects: 0,
     activeProjects: 0,
@@ -59,55 +59,38 @@ export const DashboardPage: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const response = await projectApi.getAll();
-      setProjects(response);
-      calculateStats(response);
+      const analyticsData = await analyticsApi.getDashboardAnalytics();
+      setAnalytics(analyticsData);
+      
+      // Convert analytics data to stats format for UI
+      const projectsByStage: Record<string, number> = {};
+      analyticsData.stageDistribution.forEach(stage => {
+        projectsByStage[stage.stage] = stage.count;
+      });
+
+      const monthlyTrend = analyticsData.monthlyTrends.map(trend => ({
+        month: trend.month,
+        revenue: trend.revenue,
+        projects: trend.projectCount
+      }));
+
+      setStats({
+        totalProjects: analyticsData.totalProjects,
+        activeProjects: analyticsData.activeProjects,
+        completedProjects: analyticsData.completedProjects,
+        totalRevenue: analyticsData.financialSummary.completedRevenue,
+        pendingRevenue: analyticsData.financialSummary.pendingRevenue,
+        totalCost: analyticsData.financialSummary.totalCost,
+        profitMargin: analyticsData.financialSummary.profitMargin,
+        projectsByStage,
+        monthlyTrend
+      });
     } catch (error) {
       showToast('Failed to load analytics data', 'error');
+      console.error('Analytics fetch error:', error);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const calculateStats = (projectList: Project[]) => {
-    const completed = projectList.filter(p => p.currentStage === 'COMPLETED');
-    const active = projectList.filter(p => p.currentStage !== 'COMPLETED');
-
-    const totalRevenue = completed.reduce((sum, p) => sum + (p.projectValue || 0), 0);
-    const pendingRevenue = active.reduce((sum, p) => sum + (p.projectValue || 0), 0);
-    const totalReceived = projectList.reduce((sum, p) => sum + (p.amountReceived || 0), 0);
-    const totalCost = totalRevenue * 0.6; // Assuming 60% cost ratio
-    const profitMargin = totalRevenue > 0 ? ((totalRevenue - totalCost) / totalRevenue) * 100 : 0;
-
-    // Group by stage
-    const projectsByStage: Record<string, number> = {};
-    projectList.forEach(p => {
-      projectsByStage[p.currentStage] = (projectsByStage[p.currentStage] || 0) + 1;
-    });
-
-    // Monthly trend (simplified - last 6 months)
-    const monthlyTrend = generateMonthlyTrend(projectList);
-
-    setStats({
-      totalProjects: projectList.length,
-      activeProjects: active.length,
-      completedProjects: completed.length,
-      totalRevenue,
-      pendingRevenue,
-      totalCost,
-      profitMargin,
-      projectsByStage,
-      monthlyTrend
-    });
-  };
-
-  const generateMonthlyTrend = (projectList: Project[]) => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    return months.map((month, index) => ({
-      month,
-      revenue: Math.random() * 5000000 + 1000000, // Mock data for now
-      projects: Math.floor(Math.random() * 20) + 5
-    }));
   };
 
   const formatCurrency = (amount: number) => {
@@ -238,7 +221,7 @@ export const DashboardPage: React.FC = () => {
               <div className="space-y-4">
                 {Object.entries(stats.projectsByStage).map(([stage, count]) => {
                   const total = stats.totalProjects;
-                  const percentage = total > 0 ? (Number(count) / total) * 100 : 0;
+                  const percentage = total > 0 ? (Number(count)/ total) * 100 : 0;
                   const stageColor = getStageColor(stage);
                   
                   return (
@@ -305,48 +288,7 @@ export const DashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Monthly Trend */}
-          <div className="glass-panel rounded-2xl p-6 animate-premium">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
-                <Activity className="h-5 w-5 text-white" />
-              </div>
-              <h2 className="text-lg font-black text-gray-900">Monthly Performance Trend</h2>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-              {stats.monthlyTrend.map((month) => (
-                <div key={month.month} className="text-center p-4 bg-white/50 rounded-xl border-2 border-gray-200">
-                  <p className="text-xs font-bold text-gray-600 mb-2">{month.month}</p>
-                  <p className="text-lg font-black text-gray-900 mb-1">{formatNumber(month.revenue)}</p>
-                  <p className="text-xs text-gray-500">{month.projects} projects</p>
-                </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Financial Summary */}
-          <div className="mt-6 lg:mt-8 glass-panel rounded-2xl p-6 animate-premium">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg">
-                <DollarSign className="h-5 w-5 text-white" />
-              </div>
-              <h2 className="text-lg font-black text-gray-900">Financial Summary</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl border-2 border-emerald-200">
-                <p className="text-sm font-bold text-emerald-700 mb-2">Total Revenue</p>
-                <p className="text-3xl font-black text-emerald-900">{formatNumber(stats.totalRevenue)}</p>
-              </div>
-              <div className="p-6 bg-gradient-to-br from-rose-50 to-rose-100/50 rounded-xl border-2 border-rose-200">
-                <p className="text-sm font-bold text-rose-700 mb-2">Total Cost</p>
-                <p className="text-3xl font-black text-rose-900">{formatNumber(stats.totalCost)}</p>
-              </div>
-              <div className="p-6 bg-gradient-to-br from-brand-50 to-brand-100/50 rounded-xl border-2 border-brand-200">
-                <p className="text-sm font-bold text-brand-700 mb-2">Net Profit</p>
-                <p className="text-3xl font-black text-brand-900">{formatNumber(stats.totalRevenue - stats.totalCost)}</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
