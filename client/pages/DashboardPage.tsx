@@ -141,87 +141,90 @@ export const DashboardPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Key Metrics */}
+          {/* Key Metrics - Bento Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
             {/* Total Revenue */}
-            <div className="glass-panel rounded-2xl p-6 hover:shadow-xl transition-all animate-premium">
+            <div className="bento-card backdrop-blur-xl bg-white/40 border border-white/50 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 animate-premium">
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg">
+                <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg shadow-emerald-500/30 animate-pulse">
                   <DollarSign className="h-6 w-6 text-white" />
                 </div>
-                <div className="flex items-center gap-1 text-emerald-600 text-sm font-bold">
+                <div className="flex items-center gap-1 text-emerald-600 text-sm font-bold tracking-wide">
                   <ArrowUpRight className="h-4 w-4" />
                   <span>+12.5%</span>
                 </div>
               </div>
-              <h3 className="text-sm font-bold text-gray-600 mb-1">Total Revenue</h3>
-              <p className="text-2xl font-black text-gray-900">{formatNumber(stats.totalRevenue)}</p>
-              <p className="text-xs text-gray-500 mt-2">From {stats.completedProjects} completed projects</p>
+              <h3 className="text-sm font-bold text-gray-600 mb-1 tracking-wider uppercase">Total Revenue</h3>
+              <p className="text-3xl font-black text-gray-900 display-text">{formatNumber(stats.totalRevenue)}</p>
+              <p className="text-xs text-gray-500 mt-2 font-medium">From {stats.completedProjects} completed projects</p>
             </div>
 
             {/* Pending Revenue */}
-            <div className="glass-panel rounded-2xl p-6 hover:shadow-xl transition-all animate-premium">
+            <div className="bento-card backdrop-blur-xl bg-white/40 border border-white/50 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 animate-premium">
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-lg">
+                <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-lg shadow-amber-500/30">
                   <Clock className="h-6 w-6 text-white" />
                 </div>
-                <div className="flex items-center gap-1 text-amber-600 text-sm font-bold">
+                <div className="flex items-center gap-1 text-amber-600 text-sm font-bold tracking-wide">
                   <TrendingUp className="h-4 w-4" />
                   <span>Pipeline</span>
                 </div>
               </div>
-              <h3 className="text-sm font-bold text-gray-600 mb-1">Pending Revenue</h3>
-              <p className="text-2xl font-black text-gray-900">{formatNumber(stats.pendingRevenue)}</p>
-              <p className="text-xs text-gray-500 mt-2">From {stats.activeProjects} active projects</p>
+              <h3 className="text-sm font-bold text-gray-600 mb-1 tracking-wider uppercase">Pending Revenue</h3>
+              <p className="text-3xl font-black text-gray-900 display-text">{formatNumber(stats.pendingRevenue)}</p>
+              <p className="text-xs text-gray-500 mt-2 font-medium">From {stats.activeProjects} active projects</p>
             </div>
 
             {/* Total Cost */}
-            <div className="glass-panel rounded-2xl p-6 hover:shadow-xl transition-all animate-premium">
+            <div className="bento-card backdrop-blur-xl bg-white/40 border border-white/50 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 animate-premium">
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl shadow-lg">
+                <div className="p-3 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl shadow-lg shadow-rose-500/30">
                   <Target className="h-6 w-6 text-white" />
                 </div>
-                <div className="flex items-center gap-1 text-rose-600 text-sm font-bold">
+                <div className="flex items-center gap-1 text-rose-600 text-sm font-bold tracking-wide">
                   <ArrowDownRight className="h-4 w-4" />
                   <span>-8.2%</span>
                 </div>
               </div>
-              <h3 className="text-sm font-bold text-gray-600 mb-1">Total Cost</h3>
-              <p className="text-2xl font-black text-gray-900">{formatNumber(stats.totalCost)}</p>
-              <p className="text-xs text-gray-500 mt-2">Operational expenses</p>
+              <h3 className="text-sm font-bold text-gray-600 mb-1 tracking-wider uppercase">Total Cost</h3>
+              <p className="text-3xl font-black text-gray-900 display-text">{formatNumber(stats.totalCost)}</p>
+              <p className="text-xs text-gray-500 mt-2 font-medium">Operational expenses</p>
             </div>
 
             {/* Profit Margin */}
-            <div className="glass-panel rounded-2xl p-6 hover:shadow-xl transition-all animate-premium">
-              <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl shadow-lg">
-                  <TrendingUp className="h-6 w-6 text-white" />
+            <div className="bento-card backdrop-blur-xl bg-white/40 border border-white/50 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 animate-premium relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-purple-500/5 pointer-events-none"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl shadow-lg shadow-brand-500/30 animate-pulse">
+                    <TrendingUp className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex items-center gap-1 text-brand-600 text-sm font-bold tracking-wide">
+                    <ArrowUpRight className="h-4 w-4" />
+                    <span>Healthy</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1 text-brand-600 text-sm font-bold">
-                  <ArrowUpRight className="h-4 w-4" />
-                  <span>Healthy</span>
-                </div>
+                <h3 className="text-sm font-bold text-gray-600 mb-1 tracking-wider uppercase">Profit Margin</h3>
+                <p className="text-3xl font-black text-gray-900 display-text">{stats.profitMargin.toFixed(1)}%</p>
+                <p className="text-xs text-gray-500 mt-2 font-medium">Overall profitability</p>
               </div>
-              <h3 className="text-sm font-bold text-gray-600 mb-1">Profit Margin</h3>
-              <p className="text-2xl font-black text-gray-900">{stats.profitMargin.toFixed(1)}%</p>
-              <p className="text-xs text-gray-500 mt-2">Overall profitability</p>
             </div>
           </div>
 
-          {/* Project Overview */}
+          {/* Project Overview - Bento Grid */}
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
             {/* Projects by Stage */}
-            <div className="xl:col-span-2 glass-panel rounded-2xl p-6 animate-premium">
+            <div className="xl:col-span-2 bento-card backdrop-blur-xl bg-white/40 border border-white/50 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 animate-premium">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg">
+                <div className="p-2 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg shadow-lg shadow-brand-500/30">
                   <BarChart3 className="h-5 w-5 text-white" />
                 </div>
-                <h2 className="text-lg font-black text-gray-900">Projects by Stage</h2>
+                <h2 className="text-lg font-black text-gray-900 display-text tracking-tight">Projects by Stage</h2>
               </div>
               <div className="space-y-4">
                 {Object.entries(stats.projectsByStage).map(([stage, count]) => {
                   const total = stats.totalProjects;
-                  const percentage = total > 0 ? (Number(count)/ total) * 100 : 0;
+                  const percentage = total > 0 ? (count / total) * 100 : 0;
                   const stageColor = getStageColor(stage);
                   
                   return (
@@ -243,44 +246,53 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             {/* Quick Stats */}
-            <div className="glass-panel rounded-2xl p-6 animate-premium">
+            <div className="bento-card backdrop-blur-xl bg-white/40 border border-white/50 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 animate-premium">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg">
+                <div className="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg shadow-purple-500/30">
                   <PieChart className="h-5 w-5 text-white" />
                 </div>
-                <h2 className="text-lg font-black text-gray-900">Quick Stats</h2>
+                <h2 className="text-lg font-black text-gray-900 display-text tracking-tight">Quick Stats</h2>
               </div>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-white/50 rounded-xl border-2 border-gray-200">
+                <div className="flex items-center justify-between p-4 backdrop-blur-lg bg-white/50 rounded-xl border border-white/40 hover:bg-white/60 transition-all duration-300">
                   <div className="flex items-center gap-3">
-                    <Briefcase className="h-5 w-5 text-brand-600" />
-                    <span className="text-sm font-bold text-gray-700">Total Projects</span>
+                    <div className="p-2 bg-brand-100 rounded-lg">
+                      <Briefcase className="h-5 w-5 text-brand-600" />
+                    </div>
+                    <span className="text-sm font-bold text-gray-700 tracking-wide">Total Projects</span>
                   </div>
-                  <span className="text-lg font-black text-gray-900">{stats.totalProjects}</span>
+                  <span className="text-lg font-black text-gray-900 display-text">{stats.totalProjects}</span>
                 </div>
                 
-                <div className="flex items-center justify-between p-4 bg-white/50 rounded-xl border-2 border-gray-200">
+                <div className="flex items-center justify-between p-4 backdrop-blur-lg bg-white/50 rounded-xl border border-white/40 hover:bg-white/60 transition-all duration-300">
                   <div className="flex items-center gap-3">
-                    <Clock className="h-5 w-5 text-amber-600" />
-                    <span className="text-sm font-bold text-gray-700">Active</span>
+                    <div className="p-2 bg-amber-100 rounded-lg animate-pulse">
+                      <Clock className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <span className="text-sm font-bold text-gray-700 tracking-wide">Active</span>
                   </div>
-                  <span className="text-lg font-black text-gray-900">{stats.activeProjects}</span>
+                  <span className="text-lg font-black text-gray-900 display-text">{stats.activeProjects}</span>
                 </div>
                 
-                <div className="flex items-center justify-between p-4 bg-white/50 rounded-xl border-2 border-gray-200">
+                <div className="flex items-center justify-between p-4 backdrop-blur-lg bg-white/50 rounded-xl border border-white/40 hover:bg-white/60 transition-all duration-300">
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-emerald-600" />
-                    <span className="text-sm font-bold text-gray-700">Completed</span>
+                    <div className="p-2 bg-emerald-100 rounded-lg">
+                      <CheckCircle className="h-5 w-5 text-emerald-600" />
+                    </div>
+                    <span className="text-sm font-bold text-gray-700 tracking-wide">Completed</span>
                   </div>
-                  <span className="text-lg font-black text-gray-900">{stats.completedProjects}</span>
+                  <span className="text-lg font-black text-gray-900 display-text">{stats.completedProjects}</span>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-white/50 rounded-xl border-2 border-gray-200">
-                  <div className="flex items-center gap-3">
-                    <TrendingUp className="h-5 w-5 text-brand-600" />
-                    <span className="text-sm font-bold text-gray-700">Success Rate</span>
+                <div className="flex items-center justify-between p-4 backdrop-blur-lg bg-white/50 rounded-xl border border-white/40 hover:bg-white/60 transition-all duration-300 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-brand-500/5 to-purple-500/5"></div>
+                  <div className="flex items-center gap-3 relative">
+                    <div className="p-2 bg-brand-100 rounded-lg animate-pulse">
+                      <TrendingUp className="h-5 w-5 text-brand-600" />
+                    </div>
+                    <span className="text-sm font-bold text-gray-700 tracking-wide">Success Rate</span>
                   </div>
-                  <span className="text-lg font-black text-gray-900">
+                  <span className="text-lg font-black text-gray-900 display-text relative">
                     {stats.totalProjects > 0 ? ((stats.completedProjects / stats.totalProjects) * 100).toFixed(1) : 0}%
                   </span>
                 </div>
