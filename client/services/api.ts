@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CRMEntry, AuthResponse, User, ForgotPasswordRequest, VerifyOtpRequest, ChangePasswordRequest, UpdatePasswordRequest, ApiResponse, RegisterRequest, Project, CreateProjectRequest, UpdateSalesDataRequest, UpdateAccountsDataRequest, UpdateInstallationDataRequest, StageTransitionRequest, ProjectStage, Alert, AlertSummary } from '../types';
+import { CRMEntry, AuthResponse, User, ForgotPasswordRequest, VerifyOtpRequest, ChangePasswordRequest, UpdatePasswordRequest, ApiResponse, RegisterRequest, Project, CreateProjectRequest, UpdateSalesDataRequest, UpdateAccountsDataRequest, UpdateInstallationDataRequest, StageTransitionRequest, ProjectStage, Alert, AlertSummary, Analytics, StageDistribution, MonthlyTrend, FinancialSummary } from '../types';
 
 // ============================================================================
 // ⚙️ API CONFIGURATION
@@ -389,6 +389,14 @@ export const projectApi = {
     } catch (error) { throw handleApiError(error); }
   },
 
+  // Alias for getAllProjects (for API consistency)
+  getAll: async (): Promise<Project[]> => {
+    try {
+        const res = await api.get("/projects/all");
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
   // Get Projects by Stage
   getProjectsByStage: async (stage: ProjectStage): Promise<Project[]> => {
     try {
@@ -438,6 +446,44 @@ export const alertApi = {
   dismissAlert: async (alertId: number): Promise<void> => {
     try {
         await api.post(`/alerts/${alertId}/dismiss`);
+    } catch (error) { throw handleApiError(error); }
+  }
+};
+
+// ============================================================================
+// 📊 ANALYTICS API
+// ============================================================================
+
+export const analyticsApi = {
+  // Get Comprehensive Dashboard Analytics (Super Admin only)
+  getDashboardAnalytics: async (): Promise<Analytics> => {
+    try {
+        const res = await api.get("/analytics/dashboard");
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Get Stage Distribution
+  getStageDistribution: async (): Promise<StageDistribution[]> => {
+    try {
+        const res = await api.get("/analytics/stage-distribution");
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Get Monthly Trends
+  getMonthlyTrends: async (): Promise<MonthlyTrend[]> => {
+    try {
+        const res = await api.get("/analytics/monthly-trends");
+        return res.data.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  // Get Financial Summary
+  getFinancialSummary: async (): Promise<FinancialSummary> => {
+    try {
+        const res = await api.get("/analytics/financial-summary");
+        return res.data.data;
     } catch (error) { throw handleApiError(error); }
   }
 };

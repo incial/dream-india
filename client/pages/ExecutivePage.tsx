@@ -537,4 +537,3 @@ const ProjectDetailsModal: React.FC<{
         </div>
     );
 };
-    

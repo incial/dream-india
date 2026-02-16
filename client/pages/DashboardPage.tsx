@@ -238,7 +238,7 @@ export const DashboardPage: React.FC = () => {
               <div className="space-y-4">
                 {Object.entries(stats.projectsByStage).map(([stage, count]) => {
                   const total = stats.totalProjects;
-                  const percentage = total > 0 ? (count / total) * 100 : 0;
+                  const percentage = total > 0 ? (Number(count) / total) * 100 : 0;
                   const stageColor = getStageColor(stage);
                   
                   return (

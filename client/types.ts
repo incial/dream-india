@@ -348,3 +348,42 @@ export interface ProjectFilterState {
   parentCompany?: string;
   search?: string;
 }
+
+// Analytics Types
+export interface StageDistribution {
+  stage: string;
+  count: number;
+  percentage: number;
+}
+
+export interface MonthlyTrend {
+  month: string;
+  year: number;
+  projectCount: number;
+  revenue: number;
+  completedCount: number;
+}
+
+export interface FinancialSummary {
+  totalRevenue: number;
+  completedRevenue: number;
+  pendingRevenue: number;
+  totalReceived: number;
+  totalPending: number;
+  totalCost: number;
+  estimatedProfit: number;
+  profitMargin: number;
+}
+
+export interface Analytics {
+  totalProjects: number;
+  activeProjects: number;
+  completedProjects: number;
+  successRate: number;
+  financialSummary: FinancialSummary;
+  stageDistribution: StageDistribution[];
+  monthlyTrends: MonthlyTrend[];
+  projectsThisMonth: number;
+  completedThisMonth: number;
+  revenueThisMonth: number;
+}
