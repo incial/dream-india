@@ -6,7 +6,8 @@ import { Sidebar } from '../components/layout/Sidebar';
 import { useLayout } from '../context/LayoutContext';
 import { Project, CreateProjectRequest, ProjectStage } from '../types';
 import { projectApi } from '../services/api';
-import { Plus, Search, Filter, Building2, MapPin, Calendar, User, Phone, FileText, Briefcase } from 'lucide-react';
+import { Plus, Search, Filter, Building2, MapPin, Calendar, User, Phone, FileText, Briefcase, ChevronDown } from 'lucide-react';
+import { KERALA_DISTRICTS } from '../constants/kerala-districts';
 
 export const ExecutivePage: React.FC = () => {
     const { user } = useAuth();
@@ -264,10 +265,33 @@ const CreateProjectModal: React.FC<{
         parentCompany: '',
         executiveRemarks: ''
     });
+    
+    // State for searchable district dropdown
+    const [districtSearch, setDistrictSearch] = useState('');
+    const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
+    const [filteredDistricts, setFilteredDistricts] = useState(KERALA_DISTRICTS);
+
+    // Filter districts based on search
+    useEffect(() => {
+        if (districtSearch) {
+            const filtered = KERALA_DISTRICTS.filter(district =>
+                district.toLowerCase().includes(districtSearch.toLowerCase())
+            );
+            setFilteredDistricts(filtered);
+        } else {
+            setFilteredDistricts(KERALA_DISTRICTS);
+        }
+    }, [districtSearch]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onCreate(formData);
+    };
+    
+    const handleDistrictSelect = (district: string) => {
+        setFormData({ ...formData, district });
+        setDistrictSearch(district);
+        setShowDistrictDropdown(false);
     };
 
     return (
@@ -374,13 +398,43 @@ const CreateProjectModal: React.FC<{
                                 <label className="block text-sm font-bold text-gray-700 mb-2">
                                     District
                                 </label>
-                                <input
-                                    type="text"
-                                    value={formData.district}
-                                    onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white/50 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all text-sm font-medium placeholder:text-gray-400"
-                                    placeholder="District"
-                                />
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={districtSearch}
+                                        onChange={(e) => {
+                                            setDistrictSearch(e.target.value);
+                                            setShowDistrictDropdown(true);
+                                            if (!e.target.value) {
+                                                setFormData({ ...formData, district: '' });
+                                            }
+                                        }}
+                                        onFocus={() => setShowDistrictDropdown(true)}
+                                        className="w-full px-4 py-3 bg-white/50 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all text-sm font-medium placeholder:text-gray-400"
+                                        placeholder="Search district..."
+                                    />
+                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
+                                    
+                                    {showDistrictDropdown && filteredDistricts.length > 0 && (
+                                        <>
+                                            <div 
+                                                className="fixed inset-0 z-10" 
+                                                onClick={() => setShowDistrictDropdown(false)}
+                                            />
+                                            <div className="absolute z-20 w-full mt-1 bg-white border-2 border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                                                {filteredDistricts.map((district) => (
+                                                    <div
+                                                        key={district}
+                                                        onClick={() => handleDistrictSelect(district)}
+                                                        className="px-4 py-3 hover:bg-brand-50 cursor-pointer text-sm font-medium text-gray-700 transition-colors"
+                                                    >
+                                                        {district}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-2">

@@ -7,6 +7,7 @@ import { useLayout } from '../context/LayoutContext';
 import { Project } from '../types';
 import { projectApi } from '../services/api';
 import { Search, CheckCircle, Building2, MapPin, Calendar, DollarSign, Clock, Filter, ChevronDown } from 'lucide-react';
+import { KERALA_DISTRICTS } from '../constants/kerala-districts';
 
 export const WorkCompletedPage: React.FC = () => {
     const { user } = useAuth();
@@ -81,10 +82,8 @@ export const WorkCompletedPage: React.FC = () => {
         return `₹${amount.toLocaleString('en-IN')}`;
     };
 
-    const uniqueDistricts = React.useMemo(() => 
-        Array.from(new Set(projects.map(p => p.district).filter(Boolean))), 
-        [projects]
-    );
+    // Use predefined Kerala districts instead of extracting from projects
+    const uniqueDistricts = KERALA_DISTRICTS;
 
     const uniqueRegions = React.useMemo(() => 
         Array.from(new Set(projects.map(p => p.region).filter(Boolean))), 
