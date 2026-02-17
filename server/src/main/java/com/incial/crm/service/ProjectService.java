@@ -287,6 +287,17 @@ public class ProjectService {
             throw new RuntimeException("Project Value and Invoice Amount are required before moving to Accounts");
         }
 
+        // Initialize pendingAmount if not already set
+        if (project.getPendingAmount() == null) {
+            BigDecimal amountReceived = project.getAmountReceived() != null ? project.getAmountReceived() : BigDecimal.ZERO;
+            BigDecimal pending = project.getInvoiceAmount().subtract(amountReceived);
+            if (pending.compareTo(BigDecimal.ZERO) < 0) {
+                pending = BigDecimal.ZERO;
+            }
+            project.setPendingAmount(pending);
+            project = projectRepository.save(project);
+        }
+
         // Transition to ACCOUNTS stage
         return transitionStage(id, STAGE_ACCOUNTS, "Ready for accounts processing", updatedBy, updatedByRole, false);
     }

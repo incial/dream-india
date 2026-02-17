@@ -90,13 +90,9 @@ public class AnalyticsService {
                 .mapToDouble(p -> p.getProjectValue() != null ? p.getProjectValue().doubleValue() : 0.0)
                 .sum();
         
-        // Calculate total revenue from all projects (invoice amount is the authoritative total)
+        // Calculate total revenue from actual payments received (not billed amounts)
         double totalRevenue = projects.stream()
-                .mapToDouble(p -> {
-                    // Use invoiceAmount if available, otherwise use projectValue
-                    BigDecimal amount = p.getInvoiceAmount() != null ? p.getInvoiceAmount() : p.getProjectValue();
-                    return amount != null ? amount.doubleValue() : 0.0;
-                })
+                .mapToDouble(p -> p.getAmountReceived() != null ? p.getAmountReceived().doubleValue() : 0.0)
                 .sum();
         
         double totalReceived = projects.stream()
