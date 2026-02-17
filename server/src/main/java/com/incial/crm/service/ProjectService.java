@@ -1,9 +1,11 @@
 package com.incial.crm.service;
 
 import com.incial.crm.dto.*;
+import com.incial.crm.entity.PaymentTransaction;
 import com.incial.crm.entity.Project;
 import com.incial.crm.entity.ProjectActivityLog;
 import com.incial.crm.entity.ProjectStageHistory;
+import com.incial.crm.repository.PaymentTransactionRepository;
 import com.incial.crm.repository.ProjectActivityLogRepository;
 import com.incial.crm.repository.ProjectRepository;
 import com.incial.crm.repository.ProjectStageHistoryRepository;
@@ -11,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,6 +30,9 @@ public class ProjectService {
 
     @Autowired
     private ProjectStageHistoryRepository stageHistoryRepository;
+    
+    @Autowired
+    private PaymentTransactionRepository paymentTransactionRepository;
     
     @Autowired(required = false)
     private AlertService alertService;
@@ -294,22 +301,58 @@ public class ProjectService {
             throw new RuntimeException("Accounts data can only be updated when project is in ACCOUNTS stage");
         }
 
-        // Update accounts fields
-        if (request.getPaymentStatus() != null) project.setPaymentStatus(request.getPaymentStatus());
-        if (request.getAmountReceived() != null) project.setAmountReceived(request.getAmountReceived());
-        if (request.getPendingAmount() != null) project.setPendingAmount(request.getPendingAmount());
-        if (request.getPaymentDate() != null) project.setPaymentDate(request.getPaymentDate());
-        if (request.getPaymentRemarks() != null) project.setPaymentRemarks(request.getPaymentRemarks());
-        if (request.getPaymentProofUrl() != null) project.setPaymentProofUrl(request.getPaymentProofUrl());
+        // Validate payment amount
+        if (request.getAmountReceived() == null || request.getAmountReceived().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Payment amount must be greater than zero");
+        }
 
+        // Create new payment transaction
+        PaymentTransaction payment = PaymentTransaction.builder()
+                .projectId(id)
+                .amountPaid(request.getAmountReceived())
+                .paymentDate(request.getPaymentDate() != null ? request.getPaymentDate() : LocalDate.now())
+                .paymentProofUrl(request.getPaymentProofUrl())
+                .remarks(request.getPaymentRemarks())
+                .createdBy(updatedBy)
+                .build();
+        
+        paymentTransactionRepository.save(payment);
+
+        // Calculate total received from all transactions
+        BigDecimal totalReceived = paymentTransactionRepository.sumAmountPaidByProjectId(id);
+        
+        // Calculate pending amount
+        BigDecimal invoiceAmount = project.getInvoiceAmount();
+        BigDecimal pending = invoiceAmount.subtract(totalReceived);
+        
+        // Clamp pending to 0 if negative (overpayment)
+        if (pending.compareTo(BigDecimal.ZERO) < 0) {
+            pending = BigDecimal.ZERO;
+        }
+
+        // Update payment status based on balance
+        String status;
+        if (pending.compareTo(BigDecimal.ZERO) == 0) {
+            status = "COMPLETED";
+        } else if (totalReceived.compareTo(BigDecimal.ZERO) > 0) {
+            status = "PARTIAL";
+        } else {
+            status = "PENDING";
+        }
+
+        // Update project with calculated values
+        project.setPaymentStatus(status);
+        project.setAmountReceived(totalReceived);
+        project.setPendingAmount(pending);
         project.setAccountsUpdatedTimestamp(LocalDateTime.now());
         project.setLastUpdatedBy(updatedBy);
         project = projectRepository.save(project);
 
-        logActivity(project.getId(), "FIELD_UPDATED", null, null, null, updatedBy, updatedByRole, "Accounts data updated");
+        logActivity(project.getId(), "PAYMENT_ADDED", null, null, null, updatedBy, updatedByRole, 
+                    "Payment added: ₹" + request.getAmountReceived() + " | Total: ₹" + totalReceived + " | Pending: ₹" + pending);
 
         // Auto-move to INSTALLATION if payment is COMPLETED
-        if ("COMPLETED".equals(request.getPaymentStatus())) {
+        if ("COMPLETED".equals(status)) {
             return transitionStage(id, STAGE_INSTALLATION, "Payment completed, moving to installation", "SYSTEM", "SYSTEM", true);
         }
 
@@ -330,6 +373,11 @@ public class ProjectService {
         if (request.getInstallationStatus() != null) project.setInstallationStatus(request.getInstallationStatus());
         if (request.getInstallationRemarks() != null) project.setInstallationRemarks(request.getInstallationRemarks());
         if (request.getCompletionDate() != null) project.setCompletionDate(request.getCompletionDate());
+
+        // Auto-set completion date if marking as WORK_DONE and not already set
+        if ("WORK_DONE".equals(request.getInstallationStatus()) && project.getCompletionDate() == null) {
+            project.setCompletionDate(LocalDate.now());
+        }
 
         project.setInstallationUpdatedTimestamp(LocalDateTime.now());
         project.setLastUpdatedBy(updatedBy);
@@ -434,6 +482,25 @@ public class ProjectService {
     }
 
     private ProjectDto convertToDto(Project project) {
+        // Load payment history for this project
+        List<PaymentTransaction> payments = paymentTransactionRepository
+                .findByProjectIdOrderByPaymentDateAsc(project.getId());
+        
+        // Convert to DTOs
+        List<PaymentTransactionDto> paymentHistory = payments.stream()
+                .map(PaymentTransactionDto::fromEntity)
+                .collect(Collectors.toList());
+        
+        // Calculate totalReceived and pendingAmount from transactions
+        BigDecimal totalReceived = paymentTransactionRepository.sumAmountPaidByProjectId(project.getId());
+        BigDecimal pendingAmount = BigDecimal.ZERO;
+        if (project.getInvoiceAmount() != null) {
+            pendingAmount = project.getInvoiceAmount().subtract(totalReceived);
+            if (pendingAmount.compareTo(BigDecimal.ZERO) < 0) {
+                pendingAmount = BigDecimal.ZERO;
+            }
+        }
+        
         return ProjectDto.builder()
                 .id(project.getId())
                 .school(project.getSchool())
@@ -461,7 +528,9 @@ public class ProjectService {
                 .salesUpdatedTimestamp(project.getSalesUpdatedTimestamp())
                 .paymentStatus(project.getPaymentStatus())
                 .amountReceived(project.getAmountReceived())
-                .pendingAmount(project.getPendingAmount())
+                .pendingAmount(pendingAmount)
+                .totalReceived(totalReceived)
+                .paymentHistory(paymentHistory)
                 .paymentDate(project.getPaymentDate())
                 .paymentRemarks(project.getPaymentRemarks())
                 .paymentProofUrl(project.getPaymentProofUrl())

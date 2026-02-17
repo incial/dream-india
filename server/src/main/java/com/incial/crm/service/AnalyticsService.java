@@ -26,7 +26,6 @@ public class AnalyticsService {
     private final ProjectRepository projectRepository;
     
     private static final String STAGE_COMPLETED = "COMPLETED";
-    private static final double COST_RATIO = 0.6; // Assuming 60% cost ratio for estimation
 
     /**
      * Get comprehensive analytics dashboard data
@@ -91,25 +90,26 @@ public class AnalyticsService {
                 .mapToDouble(p -> p.getProjectValue() != null ? p.getProjectValue().doubleValue() : 0.0)
                 .sum();
         
-        double pendingRevenue = projects.stream()
-                .filter(p -> !STAGE_COMPLETED.equals(p.getCurrentStage()))
-                .mapToDouble(p -> p.getProjectValue() != null ? p.getProjectValue().doubleValue() : 0.0)
+        // Calculate total revenue from all projects (invoice amount is the authoritative total)
+        double totalRevenue = projects.stream()
+                .mapToDouble(p -> {
+                    // Use invoiceAmount if available, otherwise use projectValue
+                    BigDecimal amount = p.getInvoiceAmount() != null ? p.getInvoiceAmount() : p.getProjectValue();
+                    return amount != null ? amount.doubleValue() : 0.0;
+                })
                 .sum();
-        
-        double totalRevenue = completedRevenue + pendingRevenue;
         
         double totalReceived = projects.stream()
                 .mapToDouble(p -> p.getAmountReceived() != null ? p.getAmountReceived().doubleValue() : 0.0)
                 .sum();
         
-        double totalPending = projects.stream()
+        // Pending Revenue = Total Invoice Amount - Total Received (actual unpaid balance)
+        // This will update dynamically as payments are recorded
+        double pendingRevenue = projects.stream()
                 .mapToDouble(p -> p.getPendingAmount() != null ? p.getPendingAmount().doubleValue() : 0.0)
                 .sum();
         
-        // Estimate cost as 60% of completed revenue (can be adjusted based on actual data)
-        double totalCost = completedRevenue * COST_RATIO;
-        double estimatedProfit = completedRevenue - totalCost;
-        double profitMargin = completedRevenue > 0 ? (estimatedProfit / completedRevenue) * 100 : 0;
+        double totalPending = pendingRevenue; // Same as pendingRevenue for consistency
         
         return FinancialSummaryDto.builder()
                 .totalRevenue(Math.round(totalRevenue * 100.0) / 100.0)
@@ -117,9 +117,6 @@ public class AnalyticsService {
                 .pendingRevenue(Math.round(pendingRevenue * 100.0) / 100.0)
                 .totalReceived(Math.round(totalReceived * 100.0) / 100.0)
                 .totalPending(Math.round(totalPending * 100.0) / 100.0)
-                .totalCost(Math.round(totalCost * 100.0) / 100.0)
-                .estimatedProfit(Math.round(estimatedProfit * 100.0) / 100.0)
-                .profitMargin(Math.round(profitMargin * 100.0) / 100.0)
                 .build();
     }
 

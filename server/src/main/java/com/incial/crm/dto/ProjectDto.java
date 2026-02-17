@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -53,6 +54,10 @@ public class ProjectDto {
     private String paymentRemarks;
     private String paymentProofUrl;
     private LocalDateTime accountsUpdatedTimestamp;
+    
+    // Payment Installments (Phase 2)
+    private BigDecimal totalReceived;  // Calculated sum of all payment transactions
+    private List<PaymentTransactionDto> paymentHistory;  // Full payment timeline
     
     // Installation Data
     private String installationStatus;
