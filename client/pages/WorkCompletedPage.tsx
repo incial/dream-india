@@ -388,19 +388,80 @@ const ProjectHistoryModal: React.FC<{
                         <h3 className="text-lg font-bold text-gray-900 mb-4">Financial Summary</h3>
                         <div className="grid grid-cols-3 gap-4">
                             <div className="bg-blue-50 rounded-lg p-4">
-                                <div className="text-sm text-blue-600 mb-1">Project Value</div>
-                                <div className="text-xl font-bold text-blue-900">{formatCurrency(project.projectValue)}</div>
+                                <div className="text-sm text-blue-600 mb-1">Invoice Amount</div>
+                                <div className="text-xl font-bold text-blue-900">{formatCurrency(project.invoiceAmount)}</div>
                             </div>
                             <div className="bg-green-50 rounded-lg p-4">
-                                <div className="text-sm text-green-600 mb-1">Amount Received</div>
-                                <div className="text-xl font-bold text-green-900">{formatCurrency(project.amountReceived)}</div>
+                                <div className="text-sm text-green-600 mb-1">Total Received</div>
+                                <div className="text-xl font-bold text-green-900">{formatCurrency(project.totalReceived)}</div>
                             </div>
-                            <div className="bg-red-50 rounded-lg p-4">
-                                <div className="text-sm text-red-600 mb-1">Pending Amount</div>
-                                <div className="text-xl font-bold text-red-900">{formatCurrency(project.pendingAmount)}</div>
+                            <div className="bg-purple-50 rounded-lg p-4">
+                                <div className="text-sm text-purple-600 mb-1">Completion Date</div>
+                                <div className="text-xl font-bold text-purple-900">
+                                    {project.completionDate ? new Date(project.completionDate).toLocaleDateString() : 'N/A'}
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    {/* Payment Timeline */}
+                    {project.paymentHistory && project.paymentHistory.length > 0 && (
+                        <div className="border-b border-gray-200 pb-6">
+                            <h3 className="text-lg font-bold text-gray-900 mb-4">Payment Timeline</h3>
+                            <div className="space-y-3">
+                                {project.paymentHistory
+                                    .sort((a, b) => new Date(a.paymentDate).getTime() - new Date(b.paymentDate).getTime())
+                                    .map((payment, index) => (
+                                        <div key={payment.id} className="bento-card p-4 hover:shadow-lg transition-all">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-3 mb-2">
+                                                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-700 font-bold text-sm">
+                                                            {index + 1}
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-lg font-bold text-gray-900">
+                                                                {formatCurrency(payment.amountPaid)}
+                                                            </div>
+                                                            <div className="text-sm text-gray-600">
+                                                                {new Date(payment.paymentDate).toLocaleDateString('en-IN', {
+                                                                    day: '2-digit',
+                                                                    month: 'short',
+                                                                    year: 'numeric'
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {payment.remarks && (
+                                                        <div className="text-sm text-gray-600 bg-gray-50 rounded-lg p-2 mt-2">
+                                                            <span className="font-semibold">Remarks:</span> {payment.remarks}
+                                                        </div>
+                                                    )}
+                                                    {payment.createdBy && (
+                                                        <div className="text-xs text-gray-500 mt-2">
+                                                            Added by: {payment.createdBy}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {payment.paymentProofUrl && (
+                                                    <a
+                                                        href={payment.paymentProofUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="px-3 py-2 bg-brand-100 text-brand-700 rounded-lg hover:bg-brand-200 transition-all text-sm font-semibold flex items-center gap-2"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z" />
+                                                        </svg>
+                                                        View Proof
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Timeline */}
                     <div className="border-b border-gray-200 pb-6">

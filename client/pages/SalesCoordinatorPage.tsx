@@ -7,6 +7,7 @@ import { useLayout } from '../context/LayoutContext';
 import { Project, UpdateSalesDataRequest } from '../types';
 import { projectApi } from '../services/api';
 import { Search, DollarSign, FileText, Calendar, Building2, MapPin, Send, CheckCircle, AlertCircle } from 'lucide-react';
+import { formatIndianNumber, parseIndianNumber } from '../utils/numberFormat';
 
 export const SalesCoordinatorPage: React.FC = () => {
     const { user } = useAuth();
@@ -243,6 +244,18 @@ const SalesDataModal: React.FC<{
         salesRemarks: project.salesRemarks
     });
 
+    // Reinitialize form data when project changes (ensures fresh data on modal reopen)
+    useEffect(() => {
+        setFormData({
+            projectValue: project.projectValue,
+            invoiceAmount: project.invoiceAmount,
+            pendingDelivery: project.pendingDelivery,
+            quotationRemarks: project.quotationRemarks,
+            expectedDeliveryDate: project.expectedDeliveryDate,
+            salesRemarks: project.salesRemarks
+        });
+    }, [project]);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onUpdate(project.id, formData);
@@ -266,10 +279,10 @@ const SalesDataModal: React.FC<{
                                 Project Value (₹) *
                             </label>
                             <input
-                                type="number"
+                                type="text"
                                 required
-                                value={formData.projectValue || ''}
-                                onChange={(e) => setFormData({ ...formData, projectValue: Number(e.target.value) })}
+                                value={formatIndianNumber(formData.projectValue || '')}
+                                onChange={(e) => setFormData({ ...formData, projectValue: parseIndianNumber(e.target.value) })}
                                 className="w-full px-4 py-3 bg-white/50 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all font-medium"
                                 placeholder="Enter project value"
                             />
@@ -279,10 +292,10 @@ const SalesDataModal: React.FC<{
                                 Invoice Amount (₹) *
                             </label>
                             <input
-                                type="number"
+                                type="text"
                                 required
-                                value={formData.invoiceAmount || ''}
-                                onChange={(e) => setFormData({ ...formData, invoiceAmount: Number(e.target.value) })}
+                                value={formatIndianNumber(formData.invoiceAmount || '')}
+                                onChange={(e) => setFormData({ ...formData, invoiceAmount: parseIndianNumber(e.target.value) })}
                                 className="w-full px-4 py-3 bg-white/50 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all font-medium"
                                 placeholder="Enter invoice amount"
                             />

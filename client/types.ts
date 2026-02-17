@@ -215,6 +215,18 @@ export type CalendarItem = {
     priority?: string; 
 };
 
+// Payment Transaction for Installment Tracking
+export interface PaymentTransaction {
+  id: number;
+  projectId: number;
+  amountPaid: number;
+  paymentDate: string;
+  paymentProofUrl?: string;
+  remarks?: string;
+  createdAt: string;
+  createdBy: string;
+}
+
 // Work Hub CRM Project Entity
 export interface Project {
   id: number;
@@ -252,6 +264,8 @@ export interface Project {
   paymentStatus?: PaymentStatus;
   amountReceived?: number;
   pendingAmount?: number;
+  totalReceived?: number;  // Calculated sum from payment transactions
+  paymentHistory?: PaymentTransaction[];  // List of all payment transactions
   paymentDate?: string;
   paymentRemarks?: string;
   paymentProofUrl?: string;
@@ -370,9 +384,6 @@ export interface FinancialSummary {
   pendingRevenue: number;
   totalReceived: number;
   totalPending: number;
-  totalCost: number;
-  estimatedProfit: number;
-  profitMargin: number;
 }
 
 export interface Analytics {
