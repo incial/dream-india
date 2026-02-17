@@ -28,8 +28,6 @@ interface DashboardStats {
   completedProjects: number;
   totalRevenue: number;
   pendingRevenue: number;
-  totalCost: number;
-  profitMargin: number;
   projectsByStage: Record<string, number>;
   monthlyTrend: Array<{ month: string; revenue: number; projects: number }>;
 }
@@ -46,8 +44,6 @@ export const DashboardPage: React.FC = () => {
     completedProjects: 0,
     totalRevenue: 0,
     pendingRevenue: 0,
-    totalCost: 0,
-    profitMargin: 0,
     projectsByStage: {},
     monthlyTrend: []
   });
@@ -78,10 +74,8 @@ export const DashboardPage: React.FC = () => {
         totalProjects: analyticsData.totalProjects,
         activeProjects: analyticsData.activeProjects,
         completedProjects: analyticsData.completedProjects,
-        totalRevenue: analyticsData.financialSummary.completedRevenue,
+        totalRevenue: analyticsData.financialSummary.totalRevenue,
         pendingRevenue: analyticsData.financialSummary.pendingRevenue,
-        totalCost: analyticsData.financialSummary.totalCost,
-        profitMargin: analyticsData.financialSummary.profitMargin,
         projectsByStage,
         monthlyTrend
       });
@@ -142,7 +136,7 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {/* Key Metrics - Bento Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
             {/* Total Revenue */}
             <div className="bento-card backdrop-blur-xl bg-white/40 border border-white/50 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 animate-premium">
               <div className="flex items-start justify-between mb-4">
@@ -175,39 +169,20 @@ export const DashboardPage: React.FC = () => {
               <p className="text-xs text-gray-500 mt-2 font-medium">From {stats.activeProjects} active projects</p>
             </div>
 
-            {/* Total Cost */}
+            {/* Total Projects */}
             <div className="bento-card backdrop-blur-xl bg-white/40 border border-white/50 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 animate-premium">
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl shadow-lg shadow-rose-500/30">
-                  <Target className="h-6 w-6 text-white" />
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg shadow-blue-500/30">
+                  <Briefcase className="h-6 w-6 text-white" />
                 </div>
-                <div className="flex items-center gap-1 text-rose-600 text-sm font-bold tracking-wide">
-                  <ArrowDownRight className="h-4 w-4" />
-                  <span>-8.2%</span>
+                <div className="flex items-center gap-1 text-blue-600 text-sm font-bold tracking-wide">
+                  <Activity className="h-4 w-4" />
+                  <span>Active</span>
                 </div>
               </div>
-              <h3 className="text-sm font-bold text-gray-600 mb-1 tracking-wider uppercase">Total Cost</h3>
-              <p className="text-3xl font-black text-gray-900 display-text">{formatNumber(stats.totalCost)}</p>
-              <p className="text-xs text-gray-500 mt-2 font-medium">Operational expenses</p>
-            </div>
-
-            {/* Profit Margin */}
-            <div className="bento-card backdrop-blur-xl bg-white/40 border border-white/50 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 animate-premium relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-purple-500/5 pointer-events-none"></div>
-              <div className="relative">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl shadow-lg shadow-brand-500/30 animate-pulse">
-                    <TrendingUp className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="flex items-center gap-1 text-brand-600 text-sm font-bold tracking-wide">
-                    <ArrowUpRight className="h-4 w-4" />
-                    <span>Healthy</span>
-                  </div>
-                </div>
-                <h3 className="text-sm font-bold text-gray-600 mb-1 tracking-wider uppercase">Profit Margin</h3>
-                <p className="text-3xl font-black text-gray-900 display-text">{stats.profitMargin.toFixed(1)}%</p>
-                <p className="text-xs text-gray-500 mt-2 font-medium">Overall profitability</p>
-              </div>
+              <h3 className="text-sm font-bold text-gray-600 mb-1 tracking-wider uppercase">Total Projects</h3>
+              <p className="text-3xl font-black text-gray-900 display-text">{stats.totalProjects}</p>
+              <p className="text-xs text-gray-500 mt-2 font-medium">{stats.completedProjects} completed, {stats.activeProjects} in progress</p>
             </div>
           </div>
 

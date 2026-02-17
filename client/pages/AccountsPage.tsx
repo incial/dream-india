@@ -7,6 +7,7 @@ import { useLayout } from '../context/LayoutContext';
 import { Project, UpdateAccountsDataRequest, PaymentStatus } from '../types';
 import { projectApi } from '../services/api';
 import { Search, DollarSign, CreditCard, Calendar, Building2, MapPin, Receipt, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { formatIndianNumber, parseIndianNumber } from '../utils/numberFormat';
 
 export const AccountsPage: React.FC = () => {
     const { user } = useAuth();
@@ -248,22 +249,53 @@ const PaymentModal: React.FC<{
 }> = ({ project, onClose, onUpdate }) => {
     const [formData, setFormData] = useState<UpdateAccountsDataRequest>({
         paymentStatus: project.paymentStatus || 'PENDING',
-        amountReceived: project.amountReceived,
+        amountReceived: 0,  // Start empty - user enters new payment amount only
         pendingAmount: project.pendingAmount,
         paymentDate: project.paymentDate,
         paymentRemarks: project.paymentRemarks,
         paymentProofUrl: project.paymentProofUrl
     });
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        onUpdate(project.id, formData);
-    };
+    const [validationError, setValidationError] = useState<string>('');
 
     const calculatePending = () => {
         const invoice = project.invoiceAmount || 0;
-        const received = formData.amountReceived || 0;
-        return invoice - received;
+        const currentReceived = project.totalReceived || 0;
+        const newPayment = formData.amountReceived || 0;
+        return invoice - currentReceived - newPayment;
+    };
+
+    const validateAmount = (amount: number) => {
+        const currentReceived = project.totalReceived || 0;
+        const pending = project.invoiceAmount || 0 - currentReceived;
+        
+        if (amount > pending) {
+            setValidationError('New payment cannot exceed pending amount');
+            return false;
+        }
+        if (amount <= 0) {
+            setValidationError('Payment amount must be greater than zero');
+            return false;
+        }
+        setValidationError('');
+        return true;
+    };
+
+    const handleAmountChange = (value: number) => {
+        setFormData({ ...formData, amountReceived: value });
+        validateAmount(value);
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const pending = calculatePending();
+        if (pending < 0) {
+            setValidationError('Pending amount cannot be negative. Please adjust the amount received.');
+            return;
+        }
+        if (!validateAmount(formData.amountReceived || 0)) {
+            return;
+        }
+        onUpdate(project.id, formData);
     };
 
     return (
@@ -303,15 +335,23 @@ const PaymentModal: React.FC<{
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-2">
-                                Amount Received (₹)
+                                New Payment Amount (₹)
                             </label>
                             <input
-                                type="number"
-                                value={formData.amountReceived || ''}
-                                onChange={(e) => setFormData({ ...formData, amountReceived: Number(e.target.value) })}
-                                className="w-full px-4 py-3 bg-white/50 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all font-medium"
-                                placeholder="Enter amount received"
+                                type="text"
+                                value={formatIndianNumber(formData.amountReceived || '')}
+                                onChange={(e) => handleAmountChange(parseIndianNumber(e.target.value))}
+                                className={`w-full px-4 py-3 bg-white/50 border-2 rounded-xl focus:ring-2 focus:ring-brand-500 transition-all font-medium ${
+                                    validationError ? 'border-red-500' : 'border-gray-200 focus:border-brand-500'
+                                }`}
+                                placeholder="Enter new payment amount"
                             />
+                            {validationError && (
+                                <p className="text-red-500 text-sm mt-1 font-medium flex items-center gap-1">
+                                    <AlertTriangle size={14} />
+                                    {validationError}
+                                </p>
+                            )}
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -321,7 +361,9 @@ const PaymentModal: React.FC<{
                                 type="number"
                                 value={calculatePending()}
                                 readOnly
-                                className="w-full px-4 py-3 bg-gray-100 border-2 border-gray-200 rounded-xl font-medium text-red-600"
+                                className={`w-full px-4 py-3 bg-gray-100 border-2 border-gray-200 rounded-xl font-medium ${
+                                    calculatePending() < 0 ? 'text-red-600' : 'text-gray-900'
+                                }`}
                             />
                         </div>
                     </div>
@@ -383,7 +425,12 @@ const PaymentModal: React.FC<{
                         </button>
                         <button
                             type="submit"
-                            className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
+                            disabled={!!validationError}
+                            className={`px-6 py-3 rounded-xl transition-all font-semibold ${
+                                validationError 
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                                    : 'bg-gradient-to-r from-brand-500 to-brand-600 text-white hover:shadow-lg'
+                            }`}
                         >
                             Update Payment
                         </button>

@@ -514,10 +514,10 @@ export const ReportsPage: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-lg font-black text-gray-900 display-text tracking-tight">Financial Summary</h2>
-                <p className="text-xs text-gray-500 font-medium tracking-wide">Overall financial performance and profitability</p>
+                <p className="text-xs text-gray-500 font-medium tracking-wide">Total revenue from completed projects</p>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="max-w-md">
               <div className="p-6 bg-gradient-to-br from-emerald-50/80 to-emerald-100/50 backdrop-blur-lg rounded-xl border border-emerald-200 hover:shadow-lg transition-all duration-300">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="p-2 bg-emerald-100 rounded-lg animate-pulse">
@@ -527,33 +527,6 @@ export const ReportsPage: React.FC = () => {
                 </div>
                 <p className="text-4xl font-black text-emerald-900 mb-2 display-text">{formatNumber(analytics.financialSummary.completedRevenue)}</p>
                 <p className="text-xs text-emerald-600 font-bold tracking-wide">From {analytics.completedProjects} completed projects</p>
-              </div>
-              <div className="p-6 bg-gradient-to-br from-rose-50/80 to-rose-100/50 backdrop-blur-lg rounded-xl border border-rose-200 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-2 bg-rose-100 rounded-lg">
-                    <Target className="h-5 w-5 text-rose-600" />
-                  </div>
-                  <p className="text-sm font-bold text-rose-700 tracking-wide">Total Cost</p>
-                </div>
-                <p className="text-4xl font-black text-rose-900 mb-2 display-text">{formatNumber(analytics.financialSummary.totalCost)}</p>
-                <p className="text-xs text-rose-600 font-bold tracking-wide">Operational expenses</p>
-              </div>
-              <div className="p-6 bg-gradient-to-br from-brand-50/80 to-brand-100/50 backdrop-blur-lg rounded-xl border border-brand-200 hover:shadow-lg transition-all duration-300 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-purple-500/5"></div>
-                <div className="relative">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="p-2 bg-brand-100 rounded-lg animate-pulse">
-                      <TrendingUp className="h-5 w-5 text-brand-600" />
-                    </div>
-                    <p className="text-sm font-bold text-brand-700 tracking-wide">Net Profit</p>
-                  </div>
-                  <p className="text-4xl font-black text-brand-900 mb-2 display-text">
-                    {formatNumber(analytics.financialSummary.completedRevenue - analytics.financialSummary.totalCost)}
-                  </p>
-                  <p className="text-xs text-brand-600 font-bold tracking-wide">
-                    {analytics.financialSummary.profitMargin.toFixed(1)}% profit margin
-                  </p>
-                </div>
               </div>
             </div>
           </div>

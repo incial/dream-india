@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
@@ -237,6 +237,22 @@ const AppRoutes = () => {
 }
 
 const App: React.FC = () => {
+  // Prevent mouse wheel from changing number input values globally
+  useEffect(() => {
+    const preventNumberInputWheel = (e: WheelEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' && (target as HTMLInputElement).type === 'number') {
+        e.preventDefault();
+      }
+    };
+    
+    document.addEventListener('wheel', preventNumberInputWheel, { passive: false });
+    
+    return () => {
+      document.removeEventListener('wheel', preventNumberInputWheel);
+    };
+  }, []);
+
   return (
     <AuthProvider>
         <ToastProvider>
