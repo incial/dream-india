@@ -49,6 +49,12 @@ public class Project {
     @Column(name = "executive_remarks", columnDefinition = "TEXT")
     private String executiveRemarks;
 
+    @Column(name = "last_contact")
+    private LocalDate lastContact;
+
+    @Column(name = "next_contact")
+    private LocalDate nextContact;
+
     @Column(name = "created_date", nullable = false, updatable = false)
     private LocalDateTime createdDate;
 

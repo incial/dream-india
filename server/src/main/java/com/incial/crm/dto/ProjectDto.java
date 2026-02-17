@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ProjectDto {
     private Long id;
-    
+
     // Base Information
     private String school;
     private String contactPerson;
@@ -27,16 +27,18 @@ public class ProjectDto {
     private String projectName;
     private String parentCompany;
     private String executiveRemarks;
+    private LocalDate lastContact;
+    private LocalDate nextContact;
     private LocalDateTime createdDate;
     private String createdBy;
-    
+
     // Stage Tracking
     private String currentStage;
     private String previousStage;
     private LocalDateTime stageChangeTimestamp;
     private String stageChangedBy;
     private String currentOwnerRole;
-    
+
     // Sales Data
     private BigDecimal projectValue;
     private BigDecimal invoiceAmount;
@@ -45,7 +47,7 @@ public class ProjectDto {
     private LocalDate expectedDeliveryDate;
     private String salesRemarks;
     private LocalDateTime salesUpdatedTimestamp;
-    
+
     // Accounts Data
     private String paymentStatus;
     private BigDecimal amountReceived;
@@ -54,17 +56,17 @@ public class ProjectDto {
     private String paymentRemarks;
     private String paymentProofUrl;
     private LocalDateTime accountsUpdatedTimestamp;
-    
+
     // Payment Installments (Phase 2)
     private BigDecimal totalReceived;  // Calculated sum of all payment transactions
     private List<PaymentTransactionDto> paymentHistory;  // Full payment timeline
-    
+
     // Installation Data
     private String installationStatus;
     private String installationRemarks;
     private LocalDate completionDate;
     private LocalDateTime installationUpdatedTimestamp;
-    
+
     // Audit
     private String lastUpdatedBy;
     private LocalDateTime lastUpdatedAt;
