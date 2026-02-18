@@ -301,6 +301,13 @@ export const projectApi = {
     } catch (error) { throw handleApiError(error); }
   },
 
+  // Executive - Delete Project (only if not onboarded)
+  deleteProject: async (id: number): Promise<void> => {
+    try {
+        await api.delete(`/projects/${id}`);
+    } catch (error) { throw handleApiError(error); }
+  },
+
   // Get Executive Projects
   getExecutiveProjects: async (): Promise<Project[]> => {
     try {

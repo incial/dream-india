@@ -384,4 +384,31 @@ public class ProjectController {
                             .build());
         }
     }
+
+    // Executive - Delete Project (only if not onboarded)
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('EXECUTIVE', 'ADMIN', 'SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteProject(
+            @PathVariable Long id,
+            Authentication authentication) {
+        try {
+            String userName = authentication.getName();
+            String userRole = authentication.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .findFirst()
+                    .orElse("ROLE_EXECUTIVE");
+            
+            projectService.deleteProject(id, userName, userRole);
+            return ResponseEntity.ok(ApiResponse.<Void>builder()
+                    .success(true)
+                    .message("Project deleted successfully")
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.<Void>builder()
+                            .success(false)
+                            .message(e.getMessage())
+                            .build());
+        }
+    }
 }

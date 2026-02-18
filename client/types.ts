@@ -13,6 +13,12 @@ export type ProjectStage =
   | 'INSTALLATION' 
   | 'COMPLETED';
 
+// Executive view classification (computed server-side from workflow stage)
+export type ExecutiveProjectStatus = 
+  | 'NON_ONBOARDED'      // LEAD, ON_PROGRESS, QUOTATION_SENT, IN_REVIEW
+  | 'ONBOARDED_ACTIVE'   // ONBOARDED, SALES, ACCOUNTS, INSTALLATION
+  | 'COMPLETED';         // COMPLETED
+
 export type PaymentStatus = 'PENDING' | 'PARTIAL' | 'COMPLETED';
 export type InstallationStatus = 'PENDING' | 'WORK_DONE' | 'NOT_DONE';
 export type Region = 'North' | 'South';
@@ -250,6 +256,10 @@ export interface Project {
   stageChangeTimestamp?: string;
   stageChangedBy?: string;
   currentOwnerRole?: string;
+  
+  // Executive View Status (computed server-side from currentStage)
+  // Used for executive dashboard tab categorization
+  executiveViewStatus?: ExecutiveProjectStatus;
   
   // Sales Data
   projectValue?: number;
