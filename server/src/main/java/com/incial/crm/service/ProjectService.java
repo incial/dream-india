@@ -5,6 +5,7 @@ import com.incial.crm.entity.PaymentTransaction;
 import com.incial.crm.entity.Project;
 import com.incial.crm.entity.ProjectActivityLog;
 import com.incial.crm.entity.ProjectStageHistory;
+import com.incial.crm.enums.ExecutiveProjectStatus;
 import com.incial.crm.repository.PaymentTransactionRepository;
 import com.incial.crm.repository.ProjectActivityLogRepository;
 import com.incial.crm.repository.ProjectRepository;
@@ -98,19 +99,53 @@ public class ProjectService {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Project not found with id: " + id));
 
-        // Check if project is locked or already onboarded
-        if (project.getIsLocked()) {
-            throw new RuntimeException("Cannot modify locked project");
+        // Check stage-based editing permissions
+        String currentStage = project.getCurrentStage();
+        
+        // Completed projects cannot be edited
+        if (STAGE_COMPLETED.equals(currentStage)) {
+            throw new RuntimeException("Cannot edit completed projects");
         }
 
-        if (!STAGE_LEAD.equals(project.getCurrentStage()) && 
-            !STAGE_ON_PROGRESS.equals(project.getCurrentStage()) &&
-            !STAGE_QUOTATION_SENT.equals(project.getCurrentStage()) &&
-            !STAGE_IN_REVIEW.equals(project.getCurrentStage())) {
-            throw new RuntimeException("Executive can only edit projects in LEAD, ON_PROGRESS, QUOTATION_SENT, or IN_REVIEW stages");
+        // Determine if project is in non-onboarded stages (LEAD, ON_PROGRESS, QUOTATION_SENT, IN_REVIEW)
+        boolean isNonOnboarded = STAGE_LEAD.equals(currentStage) ||
+                                 STAGE_ON_PROGRESS.equals(currentStage) ||
+                                 STAGE_QUOTATION_SENT.equals(currentStage) ||
+                                 STAGE_IN_REVIEW.equals(currentStage);
+
+        // Determine if project is in onboarded or later stages
+        boolean isOnboardedOrLater = STAGE_ONBOARDED.equals(currentStage) ||
+                                     STAGE_SALES.equals(currentStage) ||
+                                     STAGE_ACCOUNTS.equals(currentStage) ||
+                                     STAGE_INSTALLATION.equals(currentStage);
+
+        // Permission check:
+        // - Admin/Super Admin can edit any project at any stage
+        // - For non-onboarded projects (LEAD, ON_PROGRESS, QUOTATION_SENT, IN_REVIEW): ANY executive can edit
+        // - For onboarded projects (ONBOARDED, SALES, ACCOUNTS, INSTALLATION): only creator can edit
+        boolean isAdmin = ROLE_ADMIN.equals(updatedByRole) || ROLE_SUPER_ADMIN.equals(updatedByRole);
+        boolean isExecutive = ROLE_EXECUTIVE.equals(updatedByRole);
+        
+        if (!isAdmin) {
+            if (isOnboardedOrLater && !project.getCreatedBy().equals(updatedBy)) {
+                throw new RuntimeException("Only the project creator can edit onboarded projects");
+            }
+            if (!isExecutive) {
+                throw new RuntimeException("Only executives and admins can edit projects");
+            }
         }
 
-        // Update fields
+        // Note: CreateProjectRequest only contains executive fields (school, contact info, location, remarks).
+        // Financial fields (projectValue, invoiceAmount, paymentStatus, etc.) are managed through
+        // separate APIs (updateSalesData, updateAccountsData, updateInstallationData).
+        // Therefore, this method inherently only allows editing executive fields, which is the
+        // intended behavior for onboarded projects.
+        
+        // The project lock (isLocked) is used to prevent unauthorized stage transitions and
+        // modifications by other teams, but the creator can still update their executive fields
+        // even when the project is locked.
+        
+        // Update executive fields (allowed in all non-completed stages)
         if (request.getSchool() != null) project.setSchool(request.getSchool());
         if (request.getContactPerson() != null) project.setContactPerson(request.getContactPerson());
         if (request.getContactNumber() != null) project.setContactNumber(request.getContactNumber());
@@ -124,7 +159,10 @@ public class ProjectService {
         project.setLastUpdatedBy(updatedBy);
         project = projectRepository.save(project);
 
-        logActivity(project.getId(), "FIELD_UPDATED", null, null, null, updatedBy, updatedByRole, "Project details updated");
+        String logMessage = isOnboardedOrLater ? 
+            "Project executive fields updated" : 
+            "Project details updated";
+        logActivity(project.getId(), "FIELD_UPDATED", null, null, null, updatedBy, updatedByRole, logMessage);
 
         return convertToDto(project);
     }
@@ -428,13 +466,22 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves all projects for executive tracking view.
+     * 
+     * Note: Executive visibility is independent of department workflow ownership.
+     * All projects are returned regardless of creator to allow full team visibility.
+     * Each project includes a computed executiveViewStatus field that categorizes
+     * projects into NON_ONBOARDED, ONBOARDED_ACTIVE, or COMPLETED for executive tracking.
+     * 
+     * @param executiveName The name of the executive (currently not used for filtering)
+     * @return List of all projects with computed executive view status
+     */
     public List<ProjectDto> getExecutiveProjects(String executiveName) {
-        return projectRepository.findByCreatedBy(executiveName).stream()
-                .filter(p -> p.getCurrentStage().equals(STAGE_LEAD) ||
-                           p.getCurrentStage().equals(STAGE_ON_PROGRESS) ||
-                           p.getCurrentStage().equals(STAGE_QUOTATION_SENT) ||
-                           p.getCurrentStage().equals(STAGE_IN_REVIEW) ||
-                           p.getCurrentStage().equals(STAGE_ONBOARDED))
+        // Return ALL projects for full team visibility
+        // The executiveViewStatus field is computed in convertToDto() and provides
+        // the lifecycle classification for frontend tab grouping
+        return projectRepository.findAll().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -512,6 +559,9 @@ public class ProjectService {
             }
         }
         
+        // Compute executive view status from current workflow stage
+        ExecutiveProjectStatus executiveViewStatus = ExecutiveProjectStatus.fromStage(project.getCurrentStage());
+        
         return ProjectDto.builder()
                 .id(project.getId())
                 .school(project.getSchool())
@@ -530,6 +580,7 @@ public class ProjectService {
                 .stageChangeTimestamp(project.getStageChangeTimestamp())
                 .stageChangedBy(project.getStageChangedBy())
                 .currentOwnerRole(project.getCurrentOwnerRole())
+                .executiveViewStatus(executiveViewStatus)
                 .projectValue(project.getProjectValue())
                 .invoiceAmount(project.getInvoiceAmount())
                 .pendingDelivery(project.getPendingDelivery())
@@ -554,5 +605,33 @@ public class ProjectService {
                 .lastUpdatedAt(project.getLastUpdatedAt())
                 .isLocked(project.getIsLocked())
                 .build();
+    }
+
+    @Transactional
+    public void deleteProject(Long id, String deletedBy, String deletedByRole) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Project not found with id: " + id));
+
+        // Only the creator can delete (or admin/super admin)
+        boolean isAdmin = ROLE_ADMIN.equals(deletedByRole) || ROLE_SUPER_ADMIN.equals(deletedByRole);
+        if (!project.getCreatedBy().equals(deletedBy) && !isAdmin) {
+            throw new RuntimeException("Only the project creator can delete this project");
+        }
+
+        // Delete only allowed if project is not onboarded
+        if (STAGE_ONBOARDED.equals(project.getCurrentStage()) ||
+            STAGE_SALES.equals(project.getCurrentStage()) ||
+            STAGE_ACCOUNTS.equals(project.getCurrentStage()) ||
+            STAGE_INSTALLATION.equals(project.getCurrentStage()) ||
+            STAGE_COMPLETED.equals(project.getCurrentStage())) {
+            throw new RuntimeException("Cannot delete project that has been onboarded or is in later stages");
+        }
+
+        // Log deletion before removing
+        logActivity(project.getId(), "DELETED", null, null, null, deletedBy, deletedByRole, 
+                "Project deleted from " + project.getCurrentStage() + " stage");
+
+        // Delete project
+        projectRepository.delete(project);
     }
 }

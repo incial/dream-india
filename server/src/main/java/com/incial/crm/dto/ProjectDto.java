@@ -1,5 +1,6 @@
 package com.incial.crm.dto;
 
+import com.incial.crm.enums.ExecutiveProjectStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -38,6 +39,10 @@ public class ProjectDto {
     private LocalDateTime stageChangeTimestamp;
     private String stageChangedBy;
     private String currentOwnerRole;
+    
+    // Executive View Status (derived from currentStage)
+    // This categorizes projects for executive tracking independent of department workflow
+    private ExecutiveProjectStatus executiveViewStatus;
 
     // Sales Data
     private BigDecimal projectValue;
